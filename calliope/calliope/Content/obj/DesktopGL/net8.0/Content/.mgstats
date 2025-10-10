@@ -1,2 +1,3 @@
 Source File,Dest File,Processor Type,Content Type,Source File Size,Dest File Size,Build Seconds
-"C:/Neumont/Rider/MonoGame/finaltest/calliope/calliope/Content/Assets/basechar.png","C:/Neumont/Rider/MonoGame/finaltest/calliope/calliope/Content/bin/DesktopGL/Content/Assets/basechar.xnb","TextureProcessor","Texture2DContent",797,16469,0.7169329
+"E:/Coding/Neumont/Capstone/CalliopeRPGEngine/calliope/calliope/Content/Assets/basechar.png","E:/Coding/Neumont/Capstone/CalliopeRPGEngine/calliope/calliope/Content/bin/DesktopGL/Content/Assets/basechar.xnb","TextureProcessor","Texture2DContent",797,16469,0.8845006
+"E:/Coding/Neumont/Capstone/CalliopeRPGEngine/calliope/calliope/Content/Assets/basetiles.png","E:/Coding/Neumont/Capstone/CalliopeRPGEngine/calliope/calliope/Content/bin/DesktopGL/Content/Assets/basetiles.xnb","TextureProcessor","Texture2DContent",1279,4181,0.5820032

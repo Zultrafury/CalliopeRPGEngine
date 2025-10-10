@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Neumont\\Rider\\MonoGame\\finaltest\\calliope\\calliope\\calliope.csproj": {}
+    "E:\\Coding\\Neumont\\Capstone\\CalliopeRPGEngine\\calliope\\calliope\\calliope.csproj": {}
   },
   "projects": {
-    "C:\\Neumont\\Rider\\MonoGame\\finaltest\\calliope\\calliope\\calliope.csproj": {
+    "E:\\Coding\\Neumont\\Capstone\\CalliopeRPGEngine\\calliope\\calliope\\calliope.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Neumont\\Rider\\MonoGame\\finaltest\\calliope\\calliope\\calliope.csproj",
+        "projectUniqueName": "E:\\Coding\\Neumont\\Capstone\\CalliopeRPGEngine\\calliope\\calliope\\calliope.csproj",
         "projectName": "calliope",
-        "projectPath": "C:\\Neumont\\Rider\\MonoGame\\finaltest\\calliope\\calliope\\calliope.csproj",
+        "projectPath": "E:\\Coding\\Neumont\\Capstone\\CalliopeRPGEngine\\calliope\\calliope\\calliope.csproj",
         "packagesPath": "C:\\Users\\Zac\\.nuget\\packages\\",
-        "outputPath": "C:\\Neumont\\Rider\\MonoGame\\finaltest\\calliope\\calliope\\obj\\",
+        "outputPath": "E:\\Coding\\Neumont\\Capstone\\CalliopeRPGEngine\\calliope\\calliope\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -44,7 +44,8 @@
           "enableAudit": "true",
           "auditLevel": "low",
           "auditMode": "direct"
-        }
+        },
+        "SdkAnalysisLevel": "9.0.100"
       },
       "frameworks": {
         "net8.0": {

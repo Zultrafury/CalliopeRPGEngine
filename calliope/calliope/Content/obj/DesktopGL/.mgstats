@@ -1,0 +1,3 @@
+Source File,Dest File,Processor Type,Content Type,Source File Size,Dest File Size,Build Seconds
+"E:/Coding/Neumont/Capstone/CalliopeRPGEngine/calliope/calliope/Content/Assets/basechar.png","E:/Coding/Neumont/Capstone/CalliopeRPGEngine/calliope/calliope/Content/bin/DesktopGL/Assets/basechar.xnb","TextureProcessor","Texture2DContent",797,16469,0.1560381
+"E:/Coding/Neumont/Capstone/CalliopeRPGEngine/calliope/calliope/Content/Assets/basetiles.png","E:/Coding/Neumont/Capstone/CalliopeRPGEngine/calliope/calliope/Content/bin/DesktopGL/Assets/basetiles.xnb","TextureProcessor","Texture2DContent",1279,4181,0.0035782

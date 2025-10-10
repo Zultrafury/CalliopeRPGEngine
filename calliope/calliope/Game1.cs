@@ -19,7 +19,9 @@ public class Game1 : Game
     private Texture2D _spriteTexture;
     private Player _player;
     private Sprite _player2;
+    private List<Tile> _tiles = new();
     private OrthographicCamera _camera;
+    private float _renderScale = 1.0f;
 
     public Game1()
     {
@@ -40,12 +42,13 @@ public class Game1 : Game
         int screenHeight = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height;
         int screenWidth = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width;
         int scalefactor = (screenHeight/4 * 3) / int.Parse(_config["screenheight"]);
+        _renderScale = float.Parse(_config["renderscale"]);
         
         _graphics.PreferredBackBufferHeight = int.Parse(_config["screenheight"]) * scalefactor;
         _graphics.PreferredBackBufferWidth = int.Parse(_config["screenwidth"]) * scalefactor;
         
         var viewportAdapter = new BoxingViewportAdapter(Window, GraphicsDevice, 
-            int.Parse(_config["screenwidth"]), int.Parse(_config["screenheight"]));
+            (int)(int.Parse(_config["screenwidth"])*_renderScale), (int)(int.Parse(_config["screenheight"])*_renderScale));
         _camera = new OrthographicCamera(viewportAdapter);
         _camera.Position = new Vector2(0,0);
         
@@ -61,13 +64,31 @@ public class Game1 : Game
         _spriteBatch = new SpriteBatch(GraphicsDevice);
         _spriteTexture = Content.Load<Texture2D>("Assets/basechar");
         
-        _player = new Player(_spriteTexture,150,16,16);
+        _player = new Player(_spriteTexture,150,16,16)
+        {
+            Position = new Vector2((int.Parse(_config["screenwidth"])/2)-16, (int.Parse(_config["screenheight"])/2)-16)*_renderScale,
+            Scale = _renderScale
+        };
         
         _player2 = new Sprite(_spriteTexture,1,16,16)
         {
-            Position = new Vector2(0, 16),
+            Position = new Vector2(0, 16)*_renderScale,
             AnimRange = new Vector2(8, 12),
+            Scale = _renderScale
         };
+        
+        _spriteTexture = Content.Load<Texture2D>("Assets/basetiles");
+        for (int i = 0; i < 32; i++)
+        {
+            for (int j = 0; j < 32; j++)
+            {
+                _tiles.Add(new Tile(_spriteTexture, 0, new(16, 16))
+                {
+                    Position = new Vector2(i*16, j*16)*_renderScale,
+                    Scale = _renderScale
+                });
+            }
+        }
     }
 
     protected override void Update(GameTime gameTime)
@@ -77,6 +98,8 @@ public class Game1 : Game
             Exit();
         
         _player.Update(gameTime);
+        _camera.Position = _player.Position - _renderScale * new Vector2((float.Parse(_config["screenwidth"]) / 2) - 16, 
+                                                            (float.Parse(_config["screenheight"]) / 2) - 16);
         
         base.Update(gameTime);
     }
@@ -84,6 +107,11 @@ public class Game1 : Game
     protected override void Draw(GameTime gameTime)
     {
         GraphicsDevice.Clear(Color.White);
+
+        foreach (var tile in _tiles)
+        {
+            tile.Draw(_spriteBatch, gameTime, _camera.GetViewMatrix());
+        }
         
         _player.Draw(_spriteBatch, gameTime, _camera.GetViewMatrix());
         _player2.Draw(_spriteBatch, gameTime, _camera.GetViewMatrix());
