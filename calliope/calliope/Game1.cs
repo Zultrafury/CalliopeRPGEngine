@@ -17,8 +17,11 @@ public class Game1 : Game
     private GraphicsDeviceManager _graphics;
     private SpriteBatch _spriteBatch;
     private Texture2D _spriteTexture;
+    private SpriteFont _spriteFont;
     private Player _player;
     private Sprite _player2;
+    private TextDisplay _textDisplay;
+    private DialogueBox _dialogueBox;
     private List<Tile> _tiles = new();
     private OrthographicCamera _camera;
     private float _renderScale = 1.0f;
@@ -63,10 +66,11 @@ public class Game1 : Game
     {
         _spriteBatch = new SpriteBatch(GraphicsDevice);
         _spriteTexture = Content.Load<Texture2D>("Assets/basechar");
+        _spriteFont = Content.Load<SpriteFont>("Assets/Fonts/TextFont");
         
         _player = new Player(_spriteTexture,150,16,16)
         {
-            Position = new Vector2((int.Parse(_config["screenwidth"])/2)-16, (int.Parse(_config["screenheight"])/2)-16)*_renderScale,
+            Position = new Vector2((float.Parse(_config["screenwidth"])/2)-16, (float.Parse(_config["screenheight"])/2)-16)*_renderScale,
             Scale = _renderScale
         };
         
@@ -89,6 +93,17 @@ public class Game1 : Game
                 });
             }
         }
+        
+        _textDisplay = new TextDisplay(_spriteFont,"Text!\nAlso text...")
+        {
+            Position = _camera.Center,
+            Centered = true,
+            Scale = 1,
+            Color = Color.White
+        };
+
+        _dialogueBox = new DialogueBox(_spriteFont,"I'm talking! Isn't that great? Yapping is\nseriously my favorite! Like, totes cool and\nstuff...", 40, _camera.Center,
+            new Vector2(4 * _camera.BoundingRectangle.Size.Width/5,3 * _camera.BoundingRectangle.Size.Height/10));
     }
 
     protected override void Update(GameTime gameTime)
@@ -98,8 +113,10 @@ public class Game1 : Game
             Exit();
         
         _player.Update(gameTime);
-        _camera.Position = _player.Position - _renderScale * new Vector2((float.Parse(_config["screenwidth"]) / 2) - 16, 
-                                                            (float.Parse(_config["screenheight"]) / 2) - 16);
+        _camera.Position = _player.Position - _renderScale * 
+            new Vector2((float.Parse(_config["screenwidth"]) / 2), (float.Parse(_config["screenheight"]) / 2));
+
+        _dialogueBox.Update(_camera,gameTime);
         
         base.Update(gameTime);
     }
@@ -107,14 +124,26 @@ public class Game1 : Game
     protected override void Draw(GameTime gameTime)
     {
         GraphicsDevice.Clear(Color.White);
+        
+        // Worldspace Draw
+        
+        _spriteBatch.Begin(samplerState: SamplerState.PointClamp, transformMatrix: _camera.GetViewMatrix());
 
         foreach (var tile in _tiles)
         {
-            tile.Draw(_spriteBatch, gameTime, _camera.GetViewMatrix());
+            tile.Draw(_spriteBatch, gameTime);
         }
         
-        _player.Draw(_spriteBatch, gameTime, _camera.GetViewMatrix());
-        _player2.Draw(_spriteBatch, gameTime, _camera.GetViewMatrix());
+        //_dialogueBox.Draw(_spriteBatch, gameTime);
+        _player.Draw(_spriteBatch, gameTime);
+        _player2.Draw(_spriteBatch, gameTime);
+        
+        _textDisplay.Draw(_spriteBatch, gameTime);
+        _dialogueBox.Draw(_spriteBatch, gameTime);
+        
+        _spriteBatch.DrawCircle(new CircleF(_camera.Center,4 * _renderScale),16,Color.Red,5);
+        
+        _spriteBatch.End();
         
         base.Draw(gameTime);
     }

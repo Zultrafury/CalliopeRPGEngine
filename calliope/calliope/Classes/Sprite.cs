@@ -51,20 +51,16 @@ public class Sprite
 
     public Sprite(Texture2D spriteTexture, int frameRate, Vector2 dimensions) : this(spriteTexture, frameRate, (int)dimensions.X, (int)dimensions.Y) {}
 
-    public void Draw(SpriteBatch _spriteBatch, GameTime gameTime, Matrix? transformMatrix = null)
+    public void Draw(SpriteBatch _spriteBatch, GameTime gameTime)
     {
         if (AnimIndex >= AnimRange.Y) AnimIndex = (int)AnimRange.X;
         if (AnimIndex < AnimRange.X) AnimIndex = (int)AnimRange.X;
         
-        if (transformMatrix != null) _spriteBatch.Begin(samplerState: SamplerState.PointClamp, transformMatrix: transformMatrix);
-        else _spriteBatch.Begin(samplerState: SamplerState.PointClamp);
-        
         Vector2 _animSet = new Vector2(AnimIndex%AnimSetWidth, AnimIndex/AnimSetWidth);
         
-        _spriteBatch.Draw(SpriteTexture, new Rectangle((int)Position.X,(int)Position.Y,(int)(SpriteWidth*Scale),(int)(SpriteHeight*Scale)),
+        _spriteBatch.Draw(SpriteTexture, new Rectangle((int)Position.X-(int)(SpriteWidth*Scale)/2,(int)Position.Y-(int)(SpriteHeight*Scale)/2,
+                (int)(SpriteWidth*Scale),(int)(SpriteHeight*Scale)),
             new Rectangle((int)(_animSet.X*SpriteWidth),(int)(_animSet.Y*SpriteHeight),SpriteWidth,SpriteHeight), Color.White);
-        
-        _spriteBatch.End();
 
         if (!Playing) { return; }
         

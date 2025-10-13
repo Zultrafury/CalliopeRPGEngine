@@ -7,6 +7,7 @@ namespace calliope.Classes;
 public class Player : Sprite
 {
     public float Speed { get; set; } = 0.05f;
+    public bool Interacting { get; set; }
     public Player(Texture2D spriteTexture, int frameRate, int spriteWidth, int spriteHeight) : base(spriteTexture,frameRate,spriteWidth,spriteHeight)
     {
         
@@ -41,11 +42,13 @@ public class Player : Sprite
             Position -= new Vector2(0,Speed * gameTime.ElapsedGameTime.Milliseconds * Scale);
             AnimRange = new Vector2(4, 8);
         }
-
+        
         else
         {
             AnimIndex = 0;
             Playing = false;
         }
+
+        Interacting = (Keyboard.GetState().IsKeyDown(Keys.Z) || Keyboard.GetState().IsKeyDown(Keys.E));
     }
 }

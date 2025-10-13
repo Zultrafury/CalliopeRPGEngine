@@ -6,9 +6,11 @@
   <SourceFiles>
     <File>E:/Coding/Neumont/Capstone/CalliopeRPGEngine/calliope/calliope/Content/Assets/basechar.png</File>
     <File>E:/Coding/Neumont/Capstone/CalliopeRPGEngine/calliope/calliope/Content/Assets/basetiles.png</File>
+    <File>E:/Coding/Neumont/Capstone/CalliopeRPGEngine/calliope/calliope/Content/Assets/Fonts/TextFont.spritefont</File>
   </SourceFiles>
   <DestFiles>
     <File xsi:nil="true" />
     <File xsi:nil="true" />
+    <File>Assets/Fonts/TextFont</File>
   </DestFiles>
 </SourceFileCollection>

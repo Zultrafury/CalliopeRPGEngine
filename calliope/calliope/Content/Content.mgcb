@@ -37,3 +37,10 @@
 /processorParam:TextureFormat=Color
 /build:Assets/basetiles.png
 
+#begin Assets/Fonts/TextFont.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Compressed
+/build:Assets/Fonts/TextFont.spritefont;Assets/Fonts/TextFont
+
