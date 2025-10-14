@@ -17,9 +17,10 @@ public class Game1 : Game
     private GraphicsDeviceManager _graphics;
     private SpriteBatch _spriteBatch;
     private Texture2D _spriteTexture;
-    private SpriteFont _spriteFont;
+    private SpriteFont _gamerFont;
+    private SpriteFont _arialFont;
     private Player _player;
-    private Sprite _player2;
+    private Sprite _yapperNPC;
     private TextDisplay _textDisplay;
     private DialogueBox _dialogueBox;
     private List<Tile> _tiles = new();
@@ -66,19 +67,20 @@ public class Game1 : Game
     {
         _spriteBatch = new SpriteBatch(GraphicsDevice);
         _spriteTexture = Content.Load<Texture2D>("Assets/basechar");
-        _spriteFont = Content.Load<SpriteFont>("Assets/Fonts/TextFont");
+        _gamerFont = Content.Load<SpriteFont>("Assets/Fonts/GamerFont");
+        _arialFont = Content.Load<SpriteFont>("Assets/Fonts/ArialFont");
         
         _player = new Player(_spriteTexture,150,16,16)
         {
             Position = new Vector2((float.Parse(_config["screenwidth"])/2)-16, (float.Parse(_config["screenheight"])/2)-16)*_renderScale,
-            Scale = _renderScale
+            RenderScale = _renderScale
         };
         
-        _player2 = new Sprite(_spriteTexture,1,16,16)
+        _yapperNPC = new Sprite(_spriteTexture,1,new (16,16))
         {
             Position = new Vector2(0, 16)*_renderScale,
             AnimRange = new Vector2(8, 12),
-            Scale = _renderScale
+            RenderScale = _renderScale
         };
         
         _spriteTexture = Content.Load<Texture2D>("Assets/basetiles");
@@ -89,12 +91,12 @@ public class Game1 : Game
                 _tiles.Add(new Tile(_spriteTexture, 0, new(16, 16))
                 {
                     Position = new Vector2(i*16, j*16)*_renderScale,
-                    Scale = _renderScale
+                    RenderScale = _renderScale
                 });
             }
         }
         
-        _textDisplay = new TextDisplay(_spriteFont,"Text!\nAlso text...")
+        _textDisplay = new TextDisplay(_gamerFont,_renderScale,"Text!\nAlso text...")
         {
             Position = _camera.Center,
             Centered = true,
@@ -102,8 +104,15 @@ public class Game1 : Game
             Color = Color.White
         };
 
-        _dialogueBox = new DialogueBox(_spriteFont,"I'm talking! Isn't that great? Yapping is\nseriously my favorite! Like, totes cool and\nstuff...", 40, _camera.Center,
-            new Vector2(4 * _camera.BoundingRectangle.Size.Width/5,3 * _camera.BoundingRectangle.Size.Height/10));
+        _dialogueBox = new DialogueBox(_gamerFont, _renderScale,
+            "* I'm talking! Isn't that great? Yapping is seriously my favorite! Like, totes cool and stuff...",
+            (int)DialogueBox.TextSpeeds.Normal, _camera.Center,
+            new Vector2(4 * _camera.BoundingRectangle.Size.Width / 5, 0.225f * _camera.BoundingRectangle.Size.Height),
+            (4 * _camera.BoundingRectangle.Size.Width) / 250)
+        {
+            LinkTrigger = () => _dialogueBox.Initiate("* My dialogue is so freakin' epic.", () => {}, _arialFont,(int)DialogueBox.TextSpeeds.Slow)
+        };
+        _dialogueBox.Initiate();
     }
 
     protected override void Update(GameTime gameTime)
@@ -115,7 +124,12 @@ public class Game1 : Game
         _player.Update(gameTime);
         _camera.Position = _player.Position - _renderScale * 
             new Vector2((float.Parse(_config["screenwidth"]) / 2), (float.Parse(_config["screenheight"]) / 2));
-
+        
+        if (_player.InteractPressed) _dialogueBox.Advance();
+        if (_player.Position.X < 80) _dialogueBox.Initiate(
+            "* Letting me yap more? Great! Nothing beats even MORE yapping! Y'know, it's my favorite thing to do and whatnot sooo... Yeah!" +
+            "\nGosh, if I yapped any more, my mouth would fall off! For realsies!", () => {}, _gamerFont,(int)DialogueBox.TextSpeeds.Normal);
+        
         _dialogueBox.Update(_camera,gameTime);
         
         base.Update(gameTime);
@@ -136,12 +150,12 @@ public class Game1 : Game
         
         //_dialogueBox.Draw(_spriteBatch, gameTime);
         _player.Draw(_spriteBatch, gameTime);
-        _player2.Draw(_spriteBatch, gameTime);
+        _yapperNPC.Draw(_spriteBatch, gameTime);
         
         _textDisplay.Draw(_spriteBatch, gameTime);
         _dialogueBox.Draw(_spriteBatch, gameTime);
         
-        _spriteBatch.DrawCircle(new CircleF(_camera.Center,4 * _renderScale),16,Color.Red,5);
+        //_spriteBatch.DrawCircle(new CircleF(_camera.Center,4 * _renderScale),16,Color.Red,5);
         
         _spriteBatch.End();
         

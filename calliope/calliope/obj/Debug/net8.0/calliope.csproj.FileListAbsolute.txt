@@ -70,4 +70,5 @@ E:\Coding\Neumont\Capstone\CalliopeRPGEngine\calliope\calliope\obj\Debug\net8.0\
 E:\Coding\Neumont\Capstone\CalliopeRPGEngine\calliope\calliope\obj\Debug\net8.0\calliope.genruntimeconfig.cache
 E:\Coding\Neumont\Capstone\CalliopeRPGEngine\calliope\calliope\obj\Debug\net8.0\ref\calliope.dll
 E:\Coding\Neumont\Capstone\CalliopeRPGEngine\calliope\calliope\bin\Debug\net8.0\Content\Assets\basetiles.xnb
-E:\Coding\Neumont\Capstone\CalliopeRPGEngine\calliope\calliope\bin\Debug\net8.0\Content\Assets\Fonts\TextFont.xnb
+E:\Coding\Neumont\Capstone\CalliopeRPGEngine\calliope\calliope\bin\Debug\net8.0\Content\Assets\Fonts\ArialFont.xnb
+E:\Coding\Neumont\Capstone\CalliopeRPGEngine\calliope\calliope\bin\Debug\net8.0\Content\Assets\Fonts\GamerFont.xnb
