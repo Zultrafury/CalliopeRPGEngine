@@ -18,7 +18,9 @@
   </component>
   <component name="HighlightingSettingsPerFile">
     <setting file="file://$PROJECT_DIR$/calliope/Classes/DialogueBox.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/calliope/Classes/InteractTriggerArea.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/calliope/Classes/TextDisplay.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/calliope/Classes/TriggerArea.cs" root0="FORCE_HIGHLIGHTING" />
   </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 2
@@ -80,7 +82,8 @@
       <workItem from="1759776919467" duration="157000" />
       <workItem from="1759781002065" duration="54000" />
       <workItem from="1759964771648" duration="26833000" />
-      <workItem from="1760334551626" duration="33713000" />
+      <workItem from="1760334551626" duration="34099000" />
+      <workItem from="1760484306603" duration="13716000" />
     </task>
     <servers />
   </component>

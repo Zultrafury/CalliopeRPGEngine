@@ -27,6 +27,8 @@ public class DialogueBox
     public TextDisplay TextDisplay { get; set; }
     public Texture2D PortraitTexture { get; set; } = null;
     public bool Hidden { get; set; } = true;
+    public Player Player { get; set; }
+    public bool FreezePlayer { get; set; } = false;
     public Action LinkTrigger { get; set; }
     /// <summary>
     /// Some predefined ints for use with a <see cref="ScrollDelay"/>.
@@ -66,6 +68,8 @@ public class DialogueBox
         Padding = padding;
         
         Text = text;
+        
+        Initiate();
     }
 
     /// <summary>
@@ -76,6 +80,11 @@ public class DialogueBox
     /// <seealso cref="Draw"/>
     public void Update(OrthographicCamera camera, GameTime gameTime)
     {
+        if (Player.InteractPressed)
+        {
+            Advance();
+        }
+        
         Position = camera.Center + new Vector2(0,3 * camera.BoundingRectangle.Size.Height/10);
         TextDisplay.Position = Position - new Vector2(Size.X/2-Padding,Size.Y/2);
         delay += gameTime.ElapsedGameTime.Milliseconds;
@@ -114,16 +123,23 @@ public class DialogueBox
     /// <param name="linkTrigger">New link trigger to activate on box close. Set to "() => {}" for the box to have no trigger. (Optional)</param>
     /// <param name="font">New font for the text to use. (Optional)</param>
     /// <param name="scrollDelay">New scroll delay for the text to use. (Optional)</param>
-    public void Initiate(string text = null, Action linkTrigger = null, SpriteFont font = null, int? scrollDelay = null)
+    /// <param name="freezePlayer"></param>
+    public void Initiate(string text = null, Action linkTrigger = null, SpriteFont font = null, int? scrollDelay = null, bool? freezePlayer = null)
     {
         progress = 0;
         finished = false;
         Hidden = false;
         
         if (font != null) TextDisplay.Font = font;
-        if (text != null) Text = text;
+        if (text != null)
+        {
+            Text = text;
+            TextDisplay.Text = "";
+        }
         if (scrollDelay != null) ScrollDelay = scrollDelay.Value;
         if (linkTrigger != null) LinkTrigger = linkTrigger;
+        if (freezePlayer != null) FreezePlayer = freezePlayer.Value;
+        if (FreezePlayer) Player.Frozen = true;
     }
 
     /// <summary>
@@ -177,9 +193,12 @@ public class DialogueBox
     /// </summary>
     public void Advance()
     {
+        if (!Hidden) Player.InteractPressed = false;
+        
         if (finished)
         {
             Hidden = true;
+            if (FreezePlayer) Player.Frozen = false;
             LinkTrigger?.Invoke();
         }
         else progress = Text.Length - 1;
