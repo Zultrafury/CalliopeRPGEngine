@@ -5,6 +5,7 @@ using System.Text.Json;
 using calliope.Classes;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Graphics.PackedVector;
 using Microsoft.Xna.Framework.Input;
 using MonoGame.Extended;
 using MonoGame.Extended.ViewportAdapters;
@@ -24,10 +25,10 @@ public class Game1 : Game
     private TextDisplay _textDisplay;
     private DialogueBox _dialogueBox;
     private List<Tile> _tiles = new();
+    private List<Wall> _walls = new();
     private OrthographicCamera _camera;
     private float _renderScale = 1.0f;
     private InteractTriggerArea _yapperTriggerArea;
-    private TriggerArea _impassible;
 
     public Game1()
     {
@@ -45,6 +46,9 @@ public class Game1 : Game
 
     protected override void Initialize()
     {
+        IsFixedTimeStep = true;
+        TargetElapsedTime = TimeSpan.FromMilliseconds(1000.0f / float.Parse(_config["framerate"]));
+        
         int screenHeight = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height;
         int screenWidth = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width;
         int scalefactor = (screenHeight/4 * 3) / int.Parse(_config["screenheight"]);
@@ -72,33 +76,79 @@ public class Game1 : Game
         _gamerFont = Content.Load<SpriteFont>("Assets/Fonts/GamerFont");
         _arialFont = Content.Load<SpriteFont>("Assets/Fonts/ArialFont");
         
-        _player = new Player(_spriteTexture,150,16,16)
-        {
-            Position = new Vector2((float.Parse(_config["screenwidth"])/2)-16, (float.Parse(_config["screenheight"])/2)-16)*_renderScale,
-            RenderScale = _renderScale
-        };
+        // Players + NPCs
         
-        _yapperNPC = new Sprite(_spriteTexture,1,new (16,16))
+        _player = new Player(_spriteTexture,
+            new Vector2((float.Parse(_config["screenwidth"])/2)-16, (float.Parse(_config["screenheight"])/2)-16)*_renderScale,
+            16,16,150)
+        {
+            RenderScale = _renderScale,
+            Camera = _camera,
+            Config =  _config,
+            //DrawDebugRects = true
+        };
+
+        for (int i = 0; i < 2; i++)
+        {
+            Follower follower = new Follower(_spriteTexture, _player.Position, new(16, 16), 150, _player, null, 
+                1.5f * (float.Parse(_config["framerate"])/60))
+            {
+                RenderScale = _renderScale
+            };
+            _player.Followers.Add(follower);
+        }
+        
+        _yapperNPC = new Sprite(_spriteTexture, new Vector2(),new (16,16), 50)
         {
             Position = new Vector2(0, 16)*_renderScale,
             AnimRange = new Vector2(8, 12),
             RenderScale = _renderScale
         };
         
+        // Tiles + walls
+        
         _spriteTexture = Content.Load<Texture2D>("Assets/basetiles");
         for (int i = 0; i < 32; i++)
         {
             for (int j = 0; j < 32; j++)
             {
-                _tiles.Add(new Tile(_spriteTexture, Random.Shared.Next(4), new(16, 16))
+                _tiles.Add(new Tile(_spriteTexture, Random.Shared.Next(3), 
+                    new Vector2(i*16, j*16)*_renderScale, new(16, 16))
                 {
-                    Position = new Vector2(i*16, j*16)*_renderScale,
                     RenderScale = _renderScale
                 });
             }
         }
+        _tiles.Add(new Tile(Sprite.GeneratePlaceholder(GraphicsDevice,32,32), 0, 
+            new Vector2(8, -24)*_renderScale, new(32, 32))
+        {
+            RenderScale = _renderScale
+        });
+
+        for (int i = -2; i < 0; i++)
+        {
+            for (int j = 1; j < 31; j++)
+            {
+                _walls.Add(new Wall(_spriteTexture, 3,
+                    new Vector2(i * 16, j * 16) * _renderScale, new(16, 16), _player));
+            }
+        }
+        for (int j = 0; j < 32; j++)
+        {
+            _walls.Add(new Wall(_spriteTexture, 3,
+                new Vector2(-4 * 16, j * 16) * _renderScale, new(16, 16), _player));
+        }
+        _walls.Add(new Wall(_spriteTexture, 3,
+            new Vector2(-3 * 16, -1 * 16) * _renderScale, new(16, 16), _player));
+        _walls.Add(new Wall(null, 0,
+            _yapperNPC.Position, new(16, 16), _player)
+        {
+            //DrawDebugRects = true
+        });
         
-        _textDisplay = new TextDisplay(_gamerFont,_renderScale,"Text!\nAlso text...")
+        // Dialogue box + text
+
+        _textDisplay = new TextDisplay(_gamerFont, new Vector2(),_renderScale,"Text!\nAlso text...")
         {
             Position = _camera.Center,
             Centered = true,
@@ -112,22 +162,23 @@ public class Game1 : Game
             new Vector2(4 * _camera.BoundingRectangle.Size.Width / 5, 0.225f * _camera.BoundingRectangle.Size.Height),
             (4 * _camera.BoundingRectangle.Size.Width) / 250)
         {
-            LinkTrigger = () => _dialogueBox.Initiate("* My dialogue is so freakin' epic.", () => {}, 
+            LinkedAction = () => _dialogueBox.Initiate("* My dialogue is so freakin' epic.", () => {}, 
                 _arialFont,(int)DialogueBox.TextSpeeds.Slow, false),
             Player = _player,
+            Camera = _camera,
             FreezePlayer = true
         };
         _dialogueBox.Initiate();
 
-        Point yapSize = (_yapperNPC.SpriteDimensions * _renderScale * 1.25f).ToPoint();
+        // Triggers
+        
+        Point yapSize = (_yapperNPC.SpriteDimensions * _renderScale * 1.5f).ToPoint();
         Rectangle yapRect = new(_yapperNPC.Position.ToPoint()-yapSize/new Point(2,2), yapSize);
         void yapDialogue() => _dialogueBox.Initiate("* Letting me yap? Great! Nothing beats even MORE yapping! Y'know, it's my favorite thing to do and whatnot sooo... Yeah!" + 
-                                                    "\nGosh, if I yapped any more, my mouth would fall off! For realsies!", () => { }, _gamerFont, (int)DialogueBox.TextSpeeds.Normal, true);
-        _yapperTriggerArea = new InteractTriggerArea(yapRect,yapDialogue,_player);
-        
-        yapSize = (_yapperNPC.SpriteDimensions * _renderScale).ToPoint();
-        yapRect = new(_yapperNPC.Position.ToPoint()-yapSize/new Point(2,2), yapSize);
-        _impassible = new TriggerArea(yapRect, _player.Block, _player, true);
+                                                    "\nGosh, if I yapped any more, my mouth would fall off! For realsies!", () => { },
+                                                    _gamerFont, (int)DialogueBox.TextSpeeds.Normal, true);
+
+        _yapperTriggerArea = new InteractTriggerArea(yapRect, yapDialogue, _player);
     }
 
     protected override void Update(GameTime gameTime)
@@ -136,20 +187,14 @@ public class Game1 : Game
             Keyboard.GetState().IsKeyDown(Keys.Escape))
             Exit();
         
+        foreach (var follower in _player.Followers) follower.Update(gameTime);
         _player.Update(gameTime);
-        _camera.Position = _player.Position - _renderScale * 
-            new Vector2((float.Parse(_config["screenwidth"]) / 2), (float.Parse(_config["screenheight"]) / 2));
         
-        /*
-        if (_player.Position.X < 80) _dialogueBox.Initiate(
-            "* Letting me yap more? Great! Nothing beats even MORE yapping! Y'know, it's my favorite thing to do and whatnot sooo... Yeah!" +
-            "\nGosh, if I yapped any more, my mouth would fall off! For realsies!", () => {}, _gamerFont,(int)DialogueBox.TextSpeeds.Normal);
-        */
+        foreach (var wall in _walls) wall.Update(gameTime);
         
-        _dialogueBox.Update(_camera,gameTime);
+        _dialogueBox.Update(gameTime);
         
         _yapperTriggerArea.Update(gameTime);
-        _impassible.Update(gameTime);
         
         base.Update(gameTime);
     }
@@ -162,12 +207,10 @@ public class Game1 : Game
         
         _spriteBatch.Begin(samplerState: SamplerState.PointClamp, transformMatrix: _camera.GetViewMatrix());
 
-        foreach (var tile in _tiles)
-        {
-            tile.Draw(_spriteBatch, gameTime);
-        }
+        foreach (var tile in _tiles) tile.Draw(_spriteBatch, gameTime);
+        foreach (var wall in _walls) wall.Draw(_spriteBatch, gameTime);
         
-        //_dialogueBox.Draw(_spriteBatch, gameTime);
+        foreach (var follower in _player.Followers) follower.Draw(_spriteBatch, gameTime);
         _player.Draw(_spriteBatch, gameTime);
         _yapperNPC.Draw(_spriteBatch, gameTime);
         
@@ -176,7 +219,6 @@ public class Game1 : Game
         
         //_spriteBatch.DrawCircle(new CircleF(_camera.Center,4 * _renderScale),16,Color.Red,5);
         _yapperTriggerArea.Draw(_spriteBatch, gameTime);
-        _impassible.Draw(_spriteBatch, gameTime);
         
         _spriteBatch.End();
         

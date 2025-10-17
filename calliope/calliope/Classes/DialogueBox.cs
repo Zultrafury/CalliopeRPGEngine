@@ -7,9 +7,9 @@ namespace calliope.Classes;
 
 /// <summary>
 /// A box made of rectangles and a <see cref="TextDisplay"/>.
-/// It reveals text (wrapped within its width) over time based on its delay, and has a LinkTrigger that can execute a function once closed.
+/// It reveals text (wrapped within its width) over time based on its delay, and has a LinkedAction that can execute a function once closed.
 /// </summary>
-public class DialogueBox
+public class DialogueBox : IUpdateDraw
 {
     private string _text;
 
@@ -28,8 +28,9 @@ public class DialogueBox
     public Texture2D PortraitTexture { get; set; } = null;
     public bool Hidden { get; set; } = true;
     public Player Player { get; set; }
+    public OrthographicCamera Camera { get; set; } = null;
     public bool FreezePlayer { get; set; } = false;
-    public Action LinkTrigger { get; set; }
+    public Action LinkedAction { get; set; }
     /// <summary>
     /// Some predefined ints for use with a <see cref="ScrollDelay"/>.
     /// </summary>
@@ -56,7 +57,7 @@ public class DialogueBox
     /// <param name="padding">The amount of horizontal padding between the box border and the <see cref="TextDisplay"/>.</param>
     public DialogueBox(SpriteFont font, float renderScale, string text, int scrollDelay, Vector2 position, Vector2 size, float padding)
     {
-        TextDisplay = new TextDisplay(font,renderScale, "")
+        TextDisplay = new TextDisplay(font, position,renderScale, "")
         {
             Color = Color.White
         };
@@ -78,14 +79,14 @@ public class DialogueBox
     /// <param name="camera">The <see cref="OrthographicCamera"/> of the game.</param>
     /// <param name="gameTime">The <see cref="GameTime"/> of the game.</param>
     /// <seealso cref="Draw"/>
-    public void Update(OrthographicCamera camera, GameTime gameTime)
+    public void Update(GameTime gameTime)
     {
         if (Player.InteractPressed)
         {
             Advance();
         }
         
-        Position = camera.Center + new Vector2(0,3 * camera.BoundingRectangle.Size.Height/10);
+        Position = Camera.Center + new Vector2(0,3 * Camera.BoundingRectangle.Size.Height/10);
         TextDisplay.Position = Position - new Vector2(Size.X/2-Padding,Size.Y/2);
         delay += gameTime.ElapsedGameTime.Milliseconds;
         if (delay > ScrollDelay && finished == false)
@@ -98,8 +99,10 @@ public class DialogueBox
                 TextDisplay.Text = Text.Substring(0, progress);
             }
         }
+        
+        TextDisplay.Update(gameTime);
     }
-    
+
     /// <summary>
     /// This draws the box. Call this in the draw loop.
     /// </summary>
@@ -137,7 +140,7 @@ public class DialogueBox
             TextDisplay.Text = "";
         }
         if (scrollDelay != null) ScrollDelay = scrollDelay.Value;
-        if (linkTrigger != null) LinkTrigger = linkTrigger;
+        if (linkTrigger != null) LinkedAction = linkTrigger;
         if (freezePlayer != null) FreezePlayer = freezePlayer.Value;
         if (FreezePlayer) Player.Frozen = true;
     }
@@ -189,7 +192,7 @@ public class DialogueBox
 
     /// <summary>
     /// Advances the text box. If there is text that has yet to be revealed, it reveals it all.
-    /// If the text is fully revealed, this closes the text box and triggers the associated <see cref="LinkTrigger"/>.
+    /// If the text is fully revealed, this closes the text box and triggers the associated <see cref="LinkedAction"/>.
     /// </summary>
     public void Advance()
     {
@@ -199,7 +202,7 @@ public class DialogueBox
         {
             Hidden = true;
             if (FreezePlayer) Player.Frozen = false;
-            LinkTrigger?.Invoke();
+            LinkedAction?.Invoke();
         }
         else progress = Text.Length - 1;
     }

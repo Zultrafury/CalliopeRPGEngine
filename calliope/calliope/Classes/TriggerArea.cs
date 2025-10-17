@@ -9,17 +9,18 @@ namespace calliope.Classes;
 /// An area that calls a function once the player overlaps it.
 /// </summary>
 /// <param name="area">The Rectangle denoting the area.</param>
-/// <param name="linkTrigger">The function to call once entered.</param>
+/// <param name="linkedAction">The function to call once entered.</param>
 /// <param name="player">The player to check for overlaps.</param>
 /// <param name="constantTrigger">Whether to constantly call the function (true) or only call it once when entered (false).</param>
-public class TriggerArea(Rectangle area, Action linkTrigger, Player player, bool constantTrigger)
+public class TriggerArea(Rectangle area, Action linkedAction, Player player, bool constantTrigger) : IUpdateDraw
 {
-    public Rectangle Area { get; set; } = area;
-    public Action LinkTrigger { get; set; } = linkTrigger;
+    public RectangleF Area { get; set; } = area;
+    public Action LinkedAction { get; set; } = linkedAction;
     public bool ConstantTrigger { get; set; } = constantTrigger;
     public Player Player { get; set; } = player;
+    public float RenderScale { get; set; } = 1f;
+    public bool DrawDebugRects { get; set; } = false;
     private bool triggered = false;
-    protected Rectangle pRect;
 
     /// <summary>
     /// This updates the area. Call this in the update loop.
@@ -28,21 +29,19 @@ public class TriggerArea(Rectangle area, Action linkTrigger, Player player, bool
     /// <seealso cref="Draw"/>
     public void Update(GameTime gameTime)
     {
-        Point pSize = (Player.SpriteDimensions * Player.RenderScale).ToPoint();
-        pRect = new Rectangle(Player.Position.ToPoint()-(pSize/new Point(2,2)), pSize);
-        if (!Area.Intersects(pRect))
+        if (!Area.Intersects(Player.CollisionArea))
         {
             triggered = false;
             return;
         }
         
-        if (ConstantTrigger) LinkTrigger?.Invoke();
+        if (ConstantTrigger) LinkedAction?.Invoke();
         else
         {
             if (!triggered)
             {
                 triggered = true;
-                LinkTrigger?.Invoke();
+                LinkedAction?.Invoke();
             }
         }
     }
@@ -55,7 +54,7 @@ public class TriggerArea(Rectangle area, Action linkTrigger, Player player, bool
     /// <seealso cref="Update"/>
     public void Draw(SpriteBatch spriteBatch, GameTime gameTime)
     {
-        spriteBatch.DrawRectangle(Area.ToRectangleF(),Color.Red,5);
-        spriteBatch.DrawRectangle(pRect.ToRectangleF(),Color.Red,5);
+        if (!DrawDebugRects) return;
+        spriteBatch.DrawRectangle(Area,Color.Red,5);
     }
 }

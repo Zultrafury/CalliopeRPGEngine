@@ -1,3 +1,4 @@
 ﻿screenwidth=320
 screenheight=240
-renderscale=8
+renderscale=20
+framerate=120

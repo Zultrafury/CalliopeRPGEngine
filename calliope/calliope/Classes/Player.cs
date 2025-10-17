@@ -1,13 +1,16 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System.Collections.Generic;
+using System.Net;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using MonoGame.Extended;
 
 namespace calliope.Classes;
 
 /// <summary>
 /// A sprite that is controlled by the user.
 /// </summary>
-public class Player : Sprite
+public class Player : Sprite, IUpdateDraw
 {
     private float _speed = 0.05f;
     public float Speed
@@ -22,6 +25,8 @@ public class Player : Sprite
 
     public bool Interacting { get; set; }
     public bool InteractPressed { get; set; }
+    public OrthographicCamera Camera { get; set; }
+    public Dictionary<string, string> Config { get; set; }
     public bool Frozen { get; set; }
     public enum MoveDirections
     {
@@ -30,18 +35,27 @@ public class Player : Sprite
         Left,
         Right
     }
+    public MoveDirections Facing { get; set; }
+    public RectangleF CollisionArea { get; set; }
+    public bool DrawDebugRects { get; set; } = false;
+    public List<Follower> Followers { get; set; } = new();
+    
     private float runSpeed;
     private float currentSpeed;
-    private Vector2 lastPosition;
     
-    public Player(Texture2D spriteTexture, int frameRate, int spriteWidth, int spriteHeight) : base(spriteTexture,frameRate,spriteWidth,spriteHeight)
+    public Player(Texture2D spriteTexture, Vector2 position, int spriteWidth, int spriteHeight, int frameRate) : 
+        base(spriteTexture, position,spriteWidth,spriteHeight, frameRate)
     {
         runSpeed = Speed * 2;
+        Face(MoveDirections.Down);
     }
+    
+    public Player(Texture2D spriteTexture, Vector2 position, Vector2 dimensions, int  frameRate) : 
+        this(spriteTexture, position, (int)dimensions.X, (int)dimensions.Y, frameRate) {}
 
-    public void Update(GameTime gameTime)
+    public new void Update(GameTime gameTime)
     {
-        lastPosition = Position;
+        
         // Interacting
         if (Keyboard.GetState().IsKeyDown(Keys.Z) || Keyboard.GetState().IsKeyDown(Keys.E))
         {
@@ -53,72 +67,159 @@ public class Player : Sprite
             InteractPressed = false;
             Interacting = false;
         }
+
+        if (!Frozen) // Movement
+        {
+            // Run Speed
+            if (Keyboard.GetState().IsKeyDown(Keys.LeftShift))
+            {
+                currentSpeed = runSpeed;
+                FrameRate = 100;
+            }
+            else
+            {
+                currentSpeed = Speed;
+                FrameRate = 150;
+            }
+
+            // Walking
+            if (Keyboard.GetState().IsKeyDown(Keys.D) || Keyboard.GetState().IsKeyDown(Keys.Right))
+            {
+                Move(MoveDirections.Right, gameTime);
+            }
+            else if (Keyboard.GetState().IsKeyDown(Keys.A) || Keyboard.GetState().IsKeyDown(Keys.Left))
+            {
+                Move(MoveDirections.Left, gameTime);
+            }
+            else if (Keyboard.GetState().IsKeyDown(Keys.S) || Keyboard.GetState().IsKeyDown(Keys.Down))
+            {
+                Move(MoveDirections.Down, gameTime);
+            }
+            else if (Keyboard.GetState().IsKeyDown(Keys.W) || Keyboard.GetState().IsKeyDown(Keys.Up))
+            {
+                Move(MoveDirections.Up, gameTime);
+            }
+            else
+            {
+                AnimIndex = 0;
+                Playing = false;
+            }
+        }
+        else Playing = false;
         
-        if (Frozen) return;
+        CalculateCollisionArea();
+
+        // Center Camera
+        Camera.Position = Position - RenderScale * 
+            new Vector2((float.Parse(Config["screenwidth"]) / 2), (float.Parse(Config["screenheight"]) / 2));
+    }
+    
+    public new void Draw(SpriteBatch spriteBatch, GameTime gameTime)
+    {
+        base.Draw(spriteBatch, gameTime);
         
-        // Run Speed
-        if (Keyboard.GetState().IsKeyDown(Keys.LeftShift))
-        {
-            currentSpeed = runSpeed;
-            FrameRate = 100;
-        }
-        else
-        {
-            currentSpeed = Speed;
-            FrameRate = 150;
-        }
-        
-        // Walking
-        if (Keyboard.GetState().IsKeyDown(Keys.D) || Keyboard.GetState().IsKeyDown(Keys.Right))
-        {
-            Move(MoveDirections.Right, gameTime);
-        }
-        else if (Keyboard.GetState().IsKeyDown(Keys.A) || Keyboard.GetState().IsKeyDown(Keys.Left))
-        {
-            Move(MoveDirections.Left, gameTime);
-        }
-        else if (Keyboard.GetState().IsKeyDown(Keys.S) || Keyboard.GetState().IsKeyDown(Keys.Down))
-        {
-            Move(MoveDirections.Down, gameTime);
-        }
-        else if (Keyboard.GetState().IsKeyDown(Keys.W) || Keyboard.GetState().IsKeyDown(Keys.Up))
-        {
-            Move(MoveDirections.Up, gameTime);            
-        }
-        else
-        {
-            AnimIndex = 0;
-            Playing = false;
-        }
+        if (!DrawDebugRects) return;
+        spriteBatch.DrawRectangle(CollisionArea,Color.Red,5);
     }
 
-    public void Move(MoveDirections direction, GameTime gameTime)
+    public void Move(MoveDirections direction, GameTime gameTime, float modifier = 1f, MoveDirections? faceOverride = null)
     {
         Playing = true;
+        
+        Face(faceOverride ?? direction);
+        
+        DragFollowers();
+
+        float moveAmount = currentSpeed * gameTime.ElapsedGameTime.Milliseconds * modifier * RenderScale;
         
         switch (direction)
         {
             case MoveDirections.Up:
-                Position -= new Vector2(0,currentSpeed * gameTime.ElapsedGameTime.Milliseconds * RenderScale);
-                AnimRange = new Vector2(4, 8);
+                Position -= new Vector2(0,moveAmount);
                 break;
             case MoveDirections.Down:
-                Position += new Vector2(0,currentSpeed * gameTime.ElapsedGameTime.Milliseconds * RenderScale);
-                AnimRange = new Vector2(0, 4);
+                Position += new Vector2(0,moveAmount);
                 break;
             case MoveDirections.Left:
-                Position -= new Vector2(currentSpeed * gameTime.ElapsedGameTime.Milliseconds * RenderScale,0);
-                AnimRange = new Vector2(12, 16);
+                Position -= new Vector2(moveAmount,0);
                 break;
             case MoveDirections.Right:
-                Position += new Vector2(currentSpeed * gameTime.ElapsedGameTime.Milliseconds * RenderScale,0);
+                Position += new Vector2(moveAmount,0);
+                break;
+        }
+    }
+
+    public void Face(MoveDirections direction)
+    {
+        switch (direction)
+        {
+            case MoveDirections.Up:
+                AnimRange = new Vector2(4, 8);
+                Facing = MoveDirections.Up;
+                break;
+            case MoveDirections.Down:
+                AnimRange = new Vector2(0, 4);
+                Facing = MoveDirections.Down;
+                break;
+            case MoveDirections.Left:
+                AnimRange = new Vector2(12, 16);
+                Facing = MoveDirections.Left;
+                break;
+            case MoveDirections.Right:
                 AnimRange = new Vector2(8, 12);
+                Facing = MoveDirections.Right;
                 break;
         }
     }
 
     public void Block()
     {
-        Position = lastPosition;
+        CalculateCollisionArea();
+        
+        DragFollowers(false);
+        
+        // Center Camera
+        Camera.Position = Position - RenderScale * 
+            new Vector2((float.Parse(Config["screenwidth"]) / 2), (float.Parse(Config["screenheight"]) / 2));
+        
+        //Reset Animation
+        AnimIndex = (int)AnimRange.X;
+    }
+
+    void CalculateCollisionArea()
+    {
+        Point pSize = (SpriteDimensions * RenderScale).ToPoint();
+        CollisionArea = new Rectangle(Position.ToPoint()-(pSize/new Point(2,2)), pSize);
+    }
+
+    void DragFollowers(bool forward = true)
+    {
+        if (forward)
+        {
+            foreach (var follower in Followers)
+            {
+                follower.RecordPosition(Facing,Position,FrameRate);
+                follower.Drag();
+            }
+        }
+        else
+        {
+            foreach (var follower in Followers)
+            {
+                follower.Ignore();
+            }
+        }
+    }
+
+    public static MoveDirections InvertMoveDirection(MoveDirections direction)
+    {
+        return direction switch
+        {
+            MoveDirections.Up => MoveDirections.Down,
+            MoveDirections.Down => MoveDirections.Up,
+            MoveDirections.Left => MoveDirections.Right,
+            MoveDirections.Right => MoveDirections.Left,
+            _ => MoveDirections.Up
+        };
     }
 }
