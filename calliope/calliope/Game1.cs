@@ -4,6 +4,7 @@ using System.IO;
 using System.Text.Json;
 using calliope.Classes;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Graphics.PackedVector;
 using Microsoft.Xna.Framework.Input;
@@ -29,6 +30,7 @@ public class Game1 : Game
     private OrthographicCamera _camera;
     private float _renderScale = 1.0f;
     private InteractTriggerArea _yapperTriggerArea;
+    private Dictionary<string,SoundEffect> _sfx = new();
 
     public Game1()
     {
@@ -72,9 +74,13 @@ public class Game1 : Game
     protected override void LoadContent()
     {
         _spriteBatch = new SpriteBatch(GraphicsDevice);
-        _spriteTexture = Content.Load<Texture2D>("Assets/basechar");
+        _spriteTexture = Content.Load<Texture2D>("Assets/Images/basechar");
         _gamerFont = Content.Load<SpriteFont>("Assets/Fonts/GamerFont");
         _arialFont = Content.Load<SpriteFont>("Assets/Fonts/ArialFont");
+        _sfx["ding"] = Content.Load<SoundEffect>("Assets/Sounds/ding");
+        _sfx["accept"] = Content.Load<SoundEffect>("Assets/Sounds/accept");
+        _sfx["deny"] = Content.Load<SoundEffect>("Assets/Sounds/deny");
+        SoundEffect.MasterVolume = float.Parse(_config["sfxvolume"]);
         
         // Players + NPCs
         
@@ -107,7 +113,7 @@ public class Game1 : Game
         
         // Tiles + walls
         
-        _spriteTexture = Content.Load<Texture2D>("Assets/basetiles");
+        _spriteTexture = Content.Load<Texture2D>("Assets/Images/basetiles");
         for (int i = 0; i < 32; i++)
         {
             for (int j = 0; j < 32; j++)
@@ -156,7 +162,7 @@ public class Game1 : Game
             Color = Color.White
         };
 
-        _dialogueBox = new DialogueBox(_gamerFont, _renderScale,
+        _dialogueBox = new DialogueBox(_gamerFont, _sfx["ding"], _renderScale,
             "* I'm talking! Isn't that great? Yapping is seriously my favorite! Like, totes cool and stuff...",
             (int)DialogueBox.TextSpeeds.Normal, _camera.Center,
             new Vector2(4 * _camera.BoundingRectangle.Size.Width / 5, 0.225f * _camera.BoundingRectangle.Size.Height),
@@ -164,6 +170,7 @@ public class Game1 : Game
         {
             LinkedAction = () => _dialogueBox.Initiate("* My dialogue is so freakin' epic.", () => {}, 
                 _arialFont,(int)DialogueBox.TextSpeeds.Slow, false),
+            CloseSoundEffect = _sfx["accept"],
             Player = _player,
             Camera = _camera,
             FreezePlayer = true
@@ -172,7 +179,7 @@ public class Game1 : Game
 
         // Triggers
         
-        Point yapSize = (_yapperNPC.SpriteDimensions * _renderScale * 1.5f).ToPoint();
+        Point yapSize = (_yapperNPC.SpriteDimensions * _renderScale).ToPoint();
         Rectangle yapRect = new(_yapperNPC.Position.ToPoint()-yapSize/new Point(2,2), yapSize);
         void yapDialogue() => _dialogueBox.Initiate("* Letting me yap? Great! Nothing beats even MORE yapping! Y'know, it's my favorite thing to do and whatnot sooo... Yeah!" + 
                                                     "\nGosh, if I yapped any more, my mouth would fall off! For realsies!", () => { },

@@ -37,6 +37,7 @@ public class Player : Sprite, IUpdateDraw
     }
     public MoveDirections Facing { get; set; }
     public RectangleF CollisionArea { get; set; }
+    public RectangleF InteractArea { get; set; }
     public bool DrawDebugRects { get; set; } = false;
     public List<Follower> Followers { get; set; } = new();
     
@@ -120,6 +121,7 @@ public class Player : Sprite, IUpdateDraw
         
         if (!DrawDebugRects) return;
         spriteBatch.DrawRectangle(CollisionArea,Color.Red,5);
+        spriteBatch.DrawRectangle(InteractArea,Color.Blue,5);
     }
 
     public void Move(MoveDirections direction, GameTime gameTime, float modifier = 1f, MoveDirections? faceOverride = null)
@@ -151,25 +153,34 @@ public class Player : Sprite, IUpdateDraw
 
     public void Face(MoveDirections direction)
     {
+        Vector2 pos = new();
+        SizeF size = new SizeF(SpriteWidth, SpriteHeight) * RenderScale;
+        
         switch (direction)
         {
             case MoveDirections.Up:
                 AnimRange = new Vector2(4, 8);
                 Facing = MoveDirections.Up;
+                pos = new Vector2(Position.X - size.Width/2, Position.Y-size.Height);
                 break;
             case MoveDirections.Down:
                 AnimRange = new Vector2(0, 4);
                 Facing = MoveDirections.Down;
+                pos = new Vector2(Position.X - size.Width/2, Position.Y);
                 break;
             case MoveDirections.Left:
                 AnimRange = new Vector2(12, 16);
                 Facing = MoveDirections.Left;
+                pos = new Vector2(Position.X-size.Width, Position.Y - size.Height/2);
                 break;
             case MoveDirections.Right:
                 AnimRange = new Vector2(8, 12);
                 Facing = MoveDirections.Right;
+                pos = new Vector2(Position.X, Position.Y - size.Height/2);
                 break;
         }
+
+        InteractArea = new RectangleF(pos, size);
     }
 
     public void Block()

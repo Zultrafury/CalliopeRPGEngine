@@ -18,14 +18,18 @@
   </component>
   <component name="HighlightingSettingsPerFile">
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/2acd3101813042f6841ef849b783ebe1138e00/1f/ca2d435a/Game.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/2acd3101813042f6841ef849b783ebe1138e00/cf/0eb6ffb7/ContentManager.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/860a1f21be134c7c868abc561ebf764864200/c5/80d2bc21/Camera`1.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/calliope/Classes/DialogueBox.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/calliope/Classes/Follower.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/calliope/Classes/IUpdateDraw.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/calliope/Classes/InteractTriggerArea.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/calliope/Classes/Menu.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/calliope/Classes/MenuComponent.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/calliope/Classes/TextDisplay.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/calliope/Classes/TriggerArea.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/calliope/Classes/Wall.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/calliope/MenuGame.cs" root0="FORCE_HIGHLIGHTING" />
   </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 2
@@ -89,7 +93,8 @@
       <workItem from="1759964771648" duration="26833000" />
       <workItem from="1760334551626" duration="34099000" />
       <workItem from="1760484306603" duration="13716000" />
-      <workItem from="1760598247321" duration="36735000" />
+      <workItem from="1760598247321" duration="36829000" />
+      <workItem from="1760841905850" duration="16891000" />
     </task>
     <servers />
   </component>

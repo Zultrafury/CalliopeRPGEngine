@@ -1,2 +1,2 @@
-﻿using var game = new calliope.Game1();
+﻿using var game = new calliope.MenuGame();
 game.Run();

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PipelineBuildEvent xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-  <SourceFile>E:/Coding/Neumont/Capstone/CalliopeRPGEngine/calliope/calliope/Content/Assets/basetiles.png</SourceFile>
+  <SourceFile>E:/Coding/Neumont/Capstone/CalliopeRPGEngine/calliope/calliope/Content/Assets/Images/basetiles.png</SourceFile>
   <SourceTime>2025-10-09T17:31:07.8062927-06:00</SourceTime>
-  <DestFile>E:/Coding/Neumont/Capstone/CalliopeRPGEngine/calliope/calliope/Content/bin/DesktopGL/Content/Assets/basetiles.xnb</DestFile>
-  <DestTime>2025-10-09T20:29:14.1530194-06:00</DestTime>
+  <DestFile>E:/Coding/Neumont/Capstone/CalliopeRPGEngine/calliope/calliope/Content/bin/DesktopGL/Content/Assets/Images/basetiles.xnb</DestFile>
+  <DestTime>2025-10-18T23:11:01.139264-06:00</DestTime>
   <Importer>TextureImporter</Importer>
   <ImporterTime>2025-06-02T04:31:02-06:00</ImporterTime>
   <Processor>TextureProcessor</Processor>

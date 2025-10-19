@@ -7,7 +7,7 @@ public class InteractTriggerArea(Rectangle area, Action linkedAction, Player pla
 {
     public new void Update(GameTime gameTime)
     {
-        if (Area.Intersects(Player.CollisionArea) && Player.InteractPressed && !Player.Frozen)
+        if (Area.Intersects(Player.InteractArea) && Player.InteractPressed && !Player.Frozen)
         {
             LinkedAction?.Invoke();
         }

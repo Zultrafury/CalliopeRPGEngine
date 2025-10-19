@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using MonoGame.Extended;
 
@@ -26,6 +27,8 @@ public class DialogueBox : IUpdateDraw
     public int ScrollDelay { get; set; }
     public TextDisplay TextDisplay { get; set; }
     public Texture2D PortraitTexture { get; set; } = null;
+    public SoundEffect TextSoundEffect { get; set; } = null;
+    public SoundEffect CloseSoundEffect { get; set; } = null;
     public bool Hidden { get; set; } = true;
     public Player Player { get; set; }
     public OrthographicCamera Camera { get; set; } = null;
@@ -47,15 +50,16 @@ public class DialogueBox : IUpdateDraw
     private bool finished = false;
     private int progress = 0;
     private int delay = 0;
-    
+
     /// <param name="font">The font for the internal <see cref="TextDisplay"/> to use.</param>
+    /// <param name="textSoundEffect">The sound effect that plays when the text reveals (and by default, when the box closes).</param>
     /// <param name="renderScale">The render scaling amount.</param>
     /// <param name="text">The text to display.</param>
     /// <param name="scrollDelay">The text reveal speed in millisecond delay between characters.</param>
     /// <param name="position">The position of the box.</param>
     /// <param name="size">The size (width and height) of the box.</param>
     /// <param name="padding">The amount of horizontal padding between the box border and the <see cref="TextDisplay"/>.</param>
-    public DialogueBox(SpriteFont font, float renderScale, string text, int scrollDelay, Vector2 position, Vector2 size, float padding)
+    public DialogueBox(SpriteFont font, SoundEffect textSoundEffect, float renderScale, string text, int scrollDelay, Vector2 position, Vector2 size, float padding)
     {
         TextDisplay = new TextDisplay(font, position,renderScale, "")
         {
@@ -67,6 +71,8 @@ public class DialogueBox : IUpdateDraw
         RenderScale = renderScale;
         ScrollDelay = scrollDelay;
         Padding = padding;
+        TextSoundEffect = textSoundEffect;
+        CloseSoundEffect = textSoundEffect;
         
         Text = text;
         
@@ -81,10 +87,7 @@ public class DialogueBox : IUpdateDraw
     /// <seealso cref="Draw"/>
     public void Update(GameTime gameTime)
     {
-        if (Player.InteractPressed)
-        {
-            Advance();
-        }
+        if (Player.InteractPressed) Advance();
         
         Position = Camera.Center + new Vector2(0,3 * Camera.BoundingRectangle.Size.Height/10);
         TextDisplay.Position = Position - new Vector2(Size.X/2-Padding,Size.Y/2);
@@ -95,7 +98,12 @@ public class DialogueBox : IUpdateDraw
             if (progress >= Text.Length) finished = true;
             else
             {
-                progress++;
+                TextSoundEffect.Play();
+                do
+                {
+                    progress++;
+                } while (progress < Text.Length && (Text[progress] == ' ' || Text[progress] == '\n'));
+
                 TextDisplay.Text = Text.Substring(0, progress);
             }
         }
@@ -197,13 +205,18 @@ public class DialogueBox : IUpdateDraw
     public void Advance()
     {
         if (!Hidden) Player.InteractPressed = false;
+        else return;
         
         if (finished)
         {
             Hidden = true;
             if (FreezePlayer) Player.Frozen = false;
             LinkedAction?.Invoke();
+            CloseSoundEffect.Play();
+            return;
         }
-        else progress = Text.Length - 1;
+        
+        TextSoundEffect.Play();
+        progress = Text.Length - 1;
     }
 }

@@ -2,3 +2,5 @@
 screenheight=240
 renderscale=20
 framerate=120
+sfxvolume=0.4
+musvolume=0.5

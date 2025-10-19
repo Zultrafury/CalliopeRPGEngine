@@ -33,7 +33,6 @@ C:\Neumont\Rider\MonoGame\finaltest\calliope\calliope\bin\Debug\net8.0\runtimes\
 C:\Neumont\Rider\MonoGame\finaltest\calliope\calliope\bin\Debug\net8.0\runtimes\iossimulator-x64\native\libopenal.a
 C:\Neumont\Rider\MonoGame\finaltest\calliope\calliope\bin\Debug\net8.0\runtimes\linux-arm64\native\libopenal.so
 C:\Neumont\Rider\MonoGame\finaltest\calliope\calliope\bin\Debug\net8.0\runtimes\linux-arm64\native\libSDL2-2.0.so.0
-E:\Coding\Neumont\Capstone\CalliopeRPGEngine\calliope\calliope\bin\Debug\net8.0\Content\Assets\basechar.xnb
 E:\Coding\Neumont\Capstone\CalliopeRPGEngine\calliope\calliope\bin\Debug\net8.0\calliope.exe
 E:\Coding\Neumont\Capstone\CalliopeRPGEngine\calliope\calliope\bin\Debug\net8.0\calliope.deps.json
 E:\Coding\Neumont\Capstone\CalliopeRPGEngine\calliope\calliope\bin\Debug\net8.0\calliope.runtimeconfig.json
@@ -69,6 +68,10 @@ E:\Coding\Neumont\Capstone\CalliopeRPGEngine\calliope\calliope\obj\Debug\net8.0\
 E:\Coding\Neumont\Capstone\CalliopeRPGEngine\calliope\calliope\obj\Debug\net8.0\calliope.pdb
 E:\Coding\Neumont\Capstone\CalliopeRPGEngine\calliope\calliope\obj\Debug\net8.0\calliope.genruntimeconfig.cache
 E:\Coding\Neumont\Capstone\CalliopeRPGEngine\calliope\calliope\obj\Debug\net8.0\ref\calliope.dll
-E:\Coding\Neumont\Capstone\CalliopeRPGEngine\calliope\calliope\bin\Debug\net8.0\Content\Assets\basetiles.xnb
 E:\Coding\Neumont\Capstone\CalliopeRPGEngine\calliope\calliope\bin\Debug\net8.0\Content\Assets\Fonts\ArialFont.xnb
 E:\Coding\Neumont\Capstone\CalliopeRPGEngine\calliope\calliope\bin\Debug\net8.0\Content\Assets\Fonts\GamerFont.xnb
+E:\Coding\Neumont\Capstone\CalliopeRPGEngine\calliope\calliope\bin\Debug\net8.0\Content\Assets\Images\basechar.xnb
+E:\Coding\Neumont\Capstone\CalliopeRPGEngine\calliope\calliope\bin\Debug\net8.0\Content\Assets\Images\basetiles.xnb
+E:\Coding\Neumont\Capstone\CalliopeRPGEngine\calliope\calliope\bin\Debug\net8.0\Content\Assets\Sounds\accept.xnb
+E:\Coding\Neumont\Capstone\CalliopeRPGEngine\calliope\calliope\bin\Debug\net8.0\Content\Assets\Sounds\deny.xnb
+E:\Coding\Neumont\Capstone\CalliopeRPGEngine\calliope\calliope\bin\Debug\net8.0\Content\Assets\Sounds\ding.xnb
