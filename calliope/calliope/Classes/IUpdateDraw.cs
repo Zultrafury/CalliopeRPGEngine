@@ -5,6 +5,8 @@ namespace calliope.Classes;
 
 public interface IUpdateDraw
 {
-    void Update(GameTime gameTime);
-    void Draw(SpriteBatch spriteBatch, GameTime gameTime);
+    public void Update(GameTime gameTime);
+    public void Draw(SpriteBatch spriteBatch, GameTime gameTime);
+    
+    public float RenderScale { get; set; }
 }

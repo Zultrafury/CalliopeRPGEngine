@@ -8,6 +8,7 @@ using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Graphics.PackedVector;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework.Media;
 using MonoGame.Extended;
 using MonoGame.Extended.ViewportAdapters;
 
@@ -66,6 +67,9 @@ public class Game1 : Game
         
         _graphics.ApplyChanges();
         
+        SoundEffect.MasterVolume = float.Parse(_config["sfxvolume"]);
+        MediaPlayer.Volume = float.Parse(_config["musvolume"]);
+        
         Window.Title = "Calliope RPG Engine";
         
         base.Initialize();
@@ -80,7 +84,6 @@ public class Game1 : Game
         _sfx["ding"] = Content.Load<SoundEffect>("Assets/Sounds/ding");
         _sfx["accept"] = Content.Load<SoundEffect>("Assets/Sounds/accept");
         _sfx["deny"] = Content.Load<SoundEffect>("Assets/Sounds/deny");
-        SoundEffect.MasterVolume = float.Parse(_config["sfxvolume"]);
         
         // Players + NPCs
         

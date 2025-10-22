@@ -54,8 +54,12 @@ public class MenuGame : Game
         
         var viewportAdapter = new BoxingViewportAdapter(Window, GraphicsDevice, 
             (int)(int.Parse(_config["screenwidth"])*_renderScale), (int)(int.Parse(_config["screenheight"])*_renderScale));
-        _camera = new OrthographicCamera(viewportAdapter);
-        _camera.Position = new Vector2(0,0);
+        _camera = new OrthographicCamera(viewportAdapter)
+        {
+            /*Position = _renderScale *
+                       new Vector2((float.Parse(_config["screenwidth"]) / 2),
+                           (float.Parse(_config["screenheight"]) / 2))*/
+        };
         
         _graphics.ApplyChanges();
         
@@ -77,6 +81,27 @@ public class MenuGame : Game
         LoadAsset("Assets/Sounds/accept");
         LoadAsset("Assets/Sounds/deny");
 
+        List<MenuComponent> components = new();
+        MenuComponent comp;
+        comp = new MenuComponent(new Vector2(0, 0), new Vector2(80, 50), _renderScale, "Box", _fonts["GamerFont"]);
+        components.Add(comp);
+
+        comp = new MenuComponent(new Vector2(100, 0), new Vector2(80, 50), _renderScale, "Box", _fonts["GamerFont"]);
+        components.Add(comp);
+        
+        comp = new MenuComponent(new Vector2(200, 0), new Vector2(80, 50), _renderScale, "Box", _fonts["GamerFont"]);
+        components.Add(comp);
+        
+        _mainMenu = new Menu(components)
+        {
+            RenderScale = _renderScale,
+            Camera = _camera
+        };
+        
+        _mainMenu.SetSounds(_sfx["ding"], _sfx["accept"], _sfx["deny"]);
+        
+        _mainMenu.Components[0].AddRelation(_mainMenu.Components[1],MenuComponent.NavDirections.Right);
+        _mainMenu.Components[1].AddRelation(_mainMenu.Components[2],MenuComponent.NavDirections.Right);
     }
 
     protected override void Update(GameTime gameTime)
@@ -85,6 +110,7 @@ public class MenuGame : Game
             Keyboard.GetState().IsKeyDown(Keys.Escape))
             Exit();
         
+        _mainMenu.Update(gameTime);
         
         base.Update(gameTime);
     }
@@ -97,28 +123,33 @@ public class MenuGame : Game
         
         _spriteBatch.Begin(samplerState: SamplerState.PointClamp, transformMatrix: _camera.GetViewMatrix());
         
+        _mainMenu.Draw(_spriteBatch, gameTime);
+        
         _spriteBatch.End();
         
         base.Draw(gameTime);
     }
 
-    void LoadAsset(string name, bool output = true)
+    void LoadAsset(string name, bool output = false)
     {
         if (output) Console.WriteLine($"Loading asset {name}...");
         if (name[..14] == "Assets/Images/")
         {
-            _textures[name[14..]] = Content.Load<Texture2D>(name);
-            if (output) Console.WriteLine($"Texture2D {name[14..]} loaded!");
+            string alias = name[14..];
+            _textures[alias] = Content.Load<Texture2D>(name);
+            if (output) Console.WriteLine($"Texture2D {alias} loaded!");
         }
         else if (name[..13] == "Assets/Fonts/")
         {
-            _fonts[name[13..]] = Content.Load<SpriteFont>(name);
-            if (output) Console.WriteLine($"SpriteFont {name[13..]} loaded!");
+            string alias = name[13..];
+            _fonts[alias] = Content.Load<SpriteFont>(name);
+            if (output) Console.WriteLine($"SpriteFont {alias} loaded!");
         }
         else if (name[..14] == "Assets/Sounds/")
         {
-            _sfx[name[14..]] = Content.Load<SoundEffect>(name);
-            if (output) Console.WriteLine($"SoundEffect {name[14..]} loaded!");
+            string alias = name[14..];
+            _sfx[alias] = Content.Load<SoundEffect>(name);
+            if (output) Console.WriteLine($"SoundEffect {alias} loaded!");
         }
         else if (output) Console.WriteLine($"Type of {name} not found.");
     }
