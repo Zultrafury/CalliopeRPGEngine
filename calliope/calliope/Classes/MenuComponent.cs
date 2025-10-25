@@ -19,26 +19,31 @@ public class MenuComponent : IUpdateDraw
     }
     public Dictionary<NavDirections, MenuComponent> Neighbors { get; set; } = new();
     public Vector2 Position { get; set; }
+    public Vector2 Offset {  get; set; }
     public Vector2 Size { get; set; }
-    public Texture2D Border { get; set; } = null;
-    public Texture2D Background { get; set; } = null;
+    public Texture2D Border { get; set; }
+    public Texture2D Background { get; set; }
     public TextDisplay Text { get; set; }
     public float RenderScale { get; set; }
     public Action LinkedAction { get; set; }
 
-    public MenuComponent(Vector2 position, Vector2 size, float renderScale, string text, SpriteFont font, Texture2D border = null, Texture2D background = null)
+    public MenuComponent(Vector2 offset, Vector2 size, float renderScale, string text, SpriteFont font, Texture2D border = null, Texture2D background = null)
     {
         RenderScale = renderScale;
-        Position = position;
+        Offset = offset*RenderScale;
         Size = size;
-        Text = new TextDisplay(font,Position*RenderScale,RenderScale,text) { Color = Color.White };
+        Text = new TextDisplay(font,Position*RenderScale,RenderScale,text)
+        {
+            Color = Color.White,
+            CenteredY = true
+        };
         if (border != null) Border = border;
         if (background != null) Background = background;
     }
     
     public void Update(GameTime gameTime)
     {
-        Text.Position = Position*RenderScale;
+        Text.Position = (Position+(Offset/2))-(new Vector2(Size.X,0)/2)*RenderScale+new Vector2(5f,0)*RenderScale;
     }
 
     public MenuComponent Navigate(NavDirections direction)
@@ -73,12 +78,12 @@ public class MenuComponent : IUpdateDraw
     {
         if (Background == null)
         {
-            spriteBatch.FillRectangle(new RectangleF(Position*RenderScale,Size*RenderScale), Color.Black);
+            spriteBatch.FillRectangle(new RectangleF((Position+(Offset/2))-(Size/2)*RenderScale,Size*RenderScale), Color.Black);
         }
         if (Border == null)
         {
             Color col = Selected ? Color.Red : Color.LightGray;
-            spriteBatch.DrawRectangle(new RectangleF(Position*RenderScale,Size*RenderScale), col, RenderScale*2);
+            spriteBatch.DrawRectangle(new RectangleF((Position+(Offset/2))-(Size/2)*RenderScale,Size*RenderScale), col, 2*RenderScale);
         }
         Text.Draw(spriteBatch, gameTime);
     }

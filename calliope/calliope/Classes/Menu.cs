@@ -12,10 +12,9 @@ public class Menu : IUpdateDraw
 {
     public float RenderScale { get; set; }
     public List<MenuComponent> Components { get; set; }
-    public Dictionary<string, string> Config { get; set; }
     public OrthographicCamera Camera { get; set; }
     public Vector2 Position { get; set; }
-
+    public bool Active { get; set; }
     public Dictionary<string, SoundEffect> Sounds { get; set; } = new()
     {
         { "navigate", null },
@@ -36,10 +35,16 @@ public class Menu : IUpdateDraw
 
     public void Update(GameTime gameTime)
     {
+        if (!Active)
+        {
+            keyboard = Keyboard.GetState();
+            return;
+        }
+        
         if (Camera != null)
         {
             Position = Camera.Center;
-            //foreach (var component in Components) component.Position = Position;
+            foreach (var component in Components) component.Position = Position;
         }
         
         if (Keyboard.GetState().IsKeyDown(Keys.D) || Keyboard.GetState().IsKeyDown(Keys.Right))
@@ -71,8 +76,10 @@ public class Menu : IUpdateDraw
 
     public void Draw(SpriteBatch spriteBatch, GameTime gameTime)
     {
+        if (!Active) return;
+        
         foreach (var component in Components) component.Draw(spriteBatch, gameTime);
-        spriteBatch.DrawCircle(Position,5*RenderScale,16,Color.Green,1*RenderScale);
+        //spriteBatch.DrawCircle(Position,5*RenderScale,16,Color.Green,1*RenderScale);
     }
 
     public void SetSounds(SoundEffect navigate, SoundEffect select, SoundEffect back)
@@ -97,6 +104,6 @@ public class Menu : IUpdateDraw
             Sounds["navigate"].Play();
             currentComponent = nextcomponent;
         }
-        else Sounds["back"].Play();
+        //else Sounds["back"].Play();
     }
 }

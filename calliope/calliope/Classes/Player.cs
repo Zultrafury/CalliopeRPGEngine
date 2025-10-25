@@ -40,7 +40,9 @@ public class Player : Sprite, IUpdateDraw
     public RectangleF InteractArea { get; set; }
     public bool DrawDebugRects { get; set; } = false;
     public List<Follower> Followers { get; set; } = new();
-    
+    public Menu StatusMenu { get; set; }
+
+    private bool statusMenuChange = false;
     private float runSpeed;
     private float currentSpeed;
     
@@ -56,68 +58,91 @@ public class Player : Sprite, IUpdateDraw
 
     public new void Update(GameTime gameTime)
     {
-        
-        // Interacting
-        if (Keyboard.GetState().IsKeyDown(Keys.Z) || Keyboard.GetState().IsKeyDown(Keys.E))
+        // Status Menu
+        if (Keyboard.GetState().IsKeyDown(Keys.Tab) || Keyboard.GetState().IsKeyDown(Keys.C))
         {
-            InteractPressed = (!Interacting);
-            Interacting = true;
-        }
-        else
-        {
-            InteractPressed = false;
-            Interacting = false;
-        }
-
-        if (!Frozen) // Movement
-        {
-            // Run Speed
-            if (Keyboard.GetState().IsKeyDown(Keys.LeftShift))
+            if (Frozen) return;
+            
+            if (!statusMenuChange)
             {
-                currentSpeed = runSpeed;
-                FrameRate = 100;
+                StatusMenu.Active = !StatusMenu.Active;
+                
+                if (StatusMenu.Active) StatusMenu.Sounds["select"].Play();
+                else StatusMenu.Sounds["back"].Play();
+            }
+            statusMenuChange = true;
+        }
+        else statusMenuChange = false;
+
+        if (!StatusMenu.Active)
+        {
+
+            // Interacting
+            if (Keyboard.GetState().IsKeyDown(Keys.Z) || Keyboard.GetState().IsKeyDown(Keys.E))
+            {
+                InteractPressed = (!Interacting);
+                Interacting = true;
             }
             else
             {
-                currentSpeed = Speed;
-                FrameRate = 150;
+                InteractPressed = false;
+                Interacting = false;
             }
 
-            // Walking
-            if (Keyboard.GetState().IsKeyDown(Keys.D) || Keyboard.GetState().IsKeyDown(Keys.Right))
+            if (!Frozen) // Movement
             {
-                Move(MoveDirections.Right, gameTime);
+                // Run Speed
+                if (Keyboard.GetState().IsKeyDown(Keys.LeftShift))
+                {
+                    currentSpeed = runSpeed;
+                    FrameRate = 100;
+                }
+                else
+                {
+                    currentSpeed = Speed;
+                    FrameRate = 150;
+                }
+
+                // Walking
+                if (Keyboard.GetState().IsKeyDown(Keys.D) || Keyboard.GetState().IsKeyDown(Keys.Right))
+                {
+                    Move(MoveDirections.Right, gameTime);
+                }
+                else if (Keyboard.GetState().IsKeyDown(Keys.A) || Keyboard.GetState().IsKeyDown(Keys.Left))
+                {
+                    Move(MoveDirections.Left, gameTime);
+                }
+                else if (Keyboard.GetState().IsKeyDown(Keys.S) || Keyboard.GetState().IsKeyDown(Keys.Down))
+                {
+                    Move(MoveDirections.Down, gameTime);
+                }
+                else if (Keyboard.GetState().IsKeyDown(Keys.W) || Keyboard.GetState().IsKeyDown(Keys.Up))
+                {
+                    Move(MoveDirections.Up, gameTime);
+                }
+                else
+                {
+                    AnimIndex = 0;
+                    Playing = false;
+                }
             }
-            else if (Keyboard.GetState().IsKeyDown(Keys.A) || Keyboard.GetState().IsKeyDown(Keys.Left))
-            {
-                Move(MoveDirections.Left, gameTime);
-            }
-            else if (Keyboard.GetState().IsKeyDown(Keys.S) || Keyboard.GetState().IsKeyDown(Keys.Down))
-            {
-                Move(MoveDirections.Down, gameTime);
-            }
-            else if (Keyboard.GetState().IsKeyDown(Keys.W) || Keyboard.GetState().IsKeyDown(Keys.Up))
-            {
-                Move(MoveDirections.Up, gameTime);
-            }
-            else
-            {
-                AnimIndex = 0;
-                Playing = false;
-            }
+            else Playing = false;
         }
-        else Playing = false;
-        
+
         CalculateCollisionArea();
 
         // Center Camera
         Camera.Position = Position - RenderScale * 
             new Vector2((float.Parse(Config["screenwidth"]) / 2), (float.Parse(Config["screenheight"]) / 2));
+        
+        StatusMenu.Update(gameTime);
     }
     
     public new void Draw(SpriteBatch spriteBatch, GameTime gameTime)
     {
         base.Draw(spriteBatch, gameTime);
+        
+        StatusMenu.Draw(spriteBatch, gameTime);
         
         if (!DrawDebugRects) return;
         spriteBatch.DrawRectangle(CollisionArea,Color.Red,5);

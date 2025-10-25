@@ -18,13 +18,16 @@ public class TextDisplay(SpriteFont font, Vector2 position, float renderScale, s
     public string Text {get; set;} = text;
     public float RenderScale {get; set;} = renderScale;
     public float Scale { get; set; } = 1;
-    public bool Centered {get; set;} = false;
+    public bool Centered {get; set;}
+    public bool CenteredY {get; set;}
 
     public void Update(GameTime gameTime) {}
 
     public void Draw(SpriteBatch _spriteBatch, GameTime gameTime)
     {
-        Vector2 center = (Centered) ? Font.MeasureString(Text)/2 : new (0,0);
+        Vector2 center;
+        if (Centered) center = Font.MeasureString(Text)/2;
+        else center = (CenteredY) ? new (0,Font.MeasureString(Text).Y / 2) : new (0,0);
         
         _spriteBatch.DrawString(Font, Text, Position, Color,0,center, (RenderScale/8) * Scale, SpriteEffects.None, 0);
     }

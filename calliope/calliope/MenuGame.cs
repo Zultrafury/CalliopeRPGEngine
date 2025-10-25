@@ -23,7 +23,7 @@ public class MenuGame : Game
     private Dictionary<string,SpriteFont> _fonts = new();
     private Dictionary<string,SoundEffect> _sfx = new();
 
-    private Menu _mainMenu;
+    private Menu statusMenu;
 
     public MenuGame()
     {
@@ -83,25 +83,25 @@ public class MenuGame : Game
 
         List<MenuComponent> components = new();
         MenuComponent comp;
-        comp = new MenuComponent(new Vector2(0, 0), new Vector2(80, 50), _renderScale, "Box", _fonts["GamerFont"]);
+        comp = new MenuComponent(new Vector2(-200, 0), new Vector2(80, 50), _renderScale, "Box", _fonts["GamerFont"]);
         components.Add(comp);
 
-        comp = new MenuComponent(new Vector2(100, 0), new Vector2(80, 50), _renderScale, "Box", _fonts["GamerFont"]);
+        comp = new MenuComponent(new Vector2(0, 0), new Vector2(80, 50), _renderScale, "Box", _fonts["GamerFont"]);
         components.Add(comp);
         
         comp = new MenuComponent(new Vector2(200, 0), new Vector2(80, 50), _renderScale, "Box", _fonts["GamerFont"]);
         components.Add(comp);
         
-        _mainMenu = new Menu(components)
+        statusMenu = new Menu(components)
         {
             RenderScale = _renderScale,
             Camera = _camera
         };
         
-        _mainMenu.SetSounds(_sfx["ding"], _sfx["accept"], _sfx["deny"]);
+        statusMenu.SetSounds(_sfx["ding"], _sfx["accept"], _sfx["deny"]);
         
-        _mainMenu.Components[0].AddRelation(_mainMenu.Components[1],MenuComponent.NavDirections.Right);
-        _mainMenu.Components[1].AddRelation(_mainMenu.Components[2],MenuComponent.NavDirections.Right);
+        statusMenu.Components[0].AddRelation(statusMenu.Components[1],MenuComponent.NavDirections.Right);
+        statusMenu.Components[1].AddRelation(statusMenu.Components[2],MenuComponent.NavDirections.Right);
     }
 
     protected override void Update(GameTime gameTime)
@@ -110,7 +110,7 @@ public class MenuGame : Game
             Keyboard.GetState().IsKeyDown(Keys.Escape))
             Exit();
         
-        _mainMenu.Update(gameTime);
+        statusMenu.Update(gameTime);
         
         base.Update(gameTime);
     }
@@ -123,7 +123,7 @@ public class MenuGame : Game
         
         _spriteBatch.Begin(samplerState: SamplerState.PointClamp, transformMatrix: _camera.GetViewMatrix());
         
-        _mainMenu.Draw(_spriteBatch, gameTime);
+        statusMenu.Draw(_spriteBatch, gameTime);
         
         _spriteBatch.End();
         
