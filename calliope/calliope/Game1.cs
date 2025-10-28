@@ -31,6 +31,7 @@ public class Game1 : Game
     private Dictionary<string,Texture2D> _textures = new();
     private Dictionary<string,SpriteFont> _fonts = new();
     private Dictionary<string,SoundEffect> _sfx = new();
+    private bool _fullscreenPressed;
 
     public Game1()
     {
@@ -70,6 +71,7 @@ public class Game1 : Game
         MediaPlayer.Volume = float.Parse(_config["musvolume"]);
         
         Window.Title = "Calliope RPG Engine";
+        Window.AllowUserResizing = true;
         
         base.Initialize();
     }
@@ -200,13 +202,17 @@ public class Game1 : Game
         // STATUS MENU
         List<MenuComponent> components = new();
         MenuComponent comp;
-        comp = new MenuComponent(new Vector2(-200, 0), new Vector2(80, 50), _renderScale, "Box", _fonts["GamerFont"]);
+        comp = new MenuComponent(new Vector2(-170, -160), new Vector2(80, 25), _renderScale, "Items", _fonts["GamerFont"]);
         components.Add(comp);
 
-        comp = new MenuComponent(new Vector2(0, 0), new Vector2(80, 50), _renderScale, "Box", _fonts["GamerFont"]);
+        comp = new MenuComponent(new Vector2(-170, -100), new Vector2(80, 25), _renderScale, "Save", _fonts["GamerFont"]);
         components.Add(comp);
         
-        comp = new MenuComponent(new Vector2(200, 0), new Vector2(80, 50), _renderScale, "Box", _fonts["GamerFont"]);
+        comp = new MenuComponent(new Vector2(-170, -40), new Vector2(80, 25), _renderScale, "Options", _fonts["GamerFont"]);
+        components.Add(comp);
+        
+        comp = new MenuComponent(new Vector2(-170, 150), new Vector2(80, 25), _renderScale, "Exit", _fonts["GamerFont"]);
+        comp.LinkedAction = Exit;
         components.Add(comp);
         
         Menu statusMenu = new Menu(components)
@@ -217,8 +223,9 @@ public class Game1 : Game
         
         statusMenu.SetSounds(_sfx["ding"], _sfx["accept"], _sfx["deny"]);
         
-        statusMenu.Components[0].AddRelation(statusMenu.Components[1],MenuComponent.NavDirections.Right);
-        statusMenu.Components[1].AddRelation(statusMenu.Components[2],MenuComponent.NavDirections.Right);
+        statusMenu.Components[0].AddRelation(statusMenu.Components[1],MenuComponent.NavDirections.Down);
+        statusMenu.Components[1].AddRelation(statusMenu.Components[2],MenuComponent.NavDirections.Down);
+        statusMenu.Components[2].AddRelation(statusMenu.Components[3],MenuComponent.NavDirections.Down);
         
         _player.StatusMenu =  statusMenu;
     }
@@ -228,6 +235,39 @@ public class Game1 : Game
         if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed ||
             Keyboard.GetState().IsKeyDown(Keys.Escape))
             Exit();
+
+        if (Keyboard.GetState().IsKeyDown(Keys.F1))
+        {
+            if (!_fullscreenPressed)
+            {
+                _fullscreenPressed = true;
+                int screenHeight = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height;
+                int screenWidth = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width;
+                int scalefactor;
+
+                if (!Window.IsBorderless)
+                {
+                    Window.IsBorderless = true;
+                    scalefactor = screenHeight / int.Parse(_config["screenheight"]);
+                    _graphics.PreferredBackBufferHeight = screenHeight;
+                    _graphics.PreferredBackBufferWidth = int.Parse(_config["screenwidth"]) * scalefactor;
+                    _graphics.ApplyChanges();
+                }
+                else
+                {
+                    Window.IsBorderless = false;
+                    scalefactor = (screenHeight / 4 * 3) / int.Parse(_config["screenheight"]);
+                    _graphics.PreferredBackBufferHeight = int.Parse(_config["screenheight"]) * scalefactor;
+                    _graphics.PreferredBackBufferWidth = int.Parse(_config["screenwidth"]) * scalefactor;
+                    _graphics.ApplyChanges();
+                }
+
+                Window.Position = new Point(
+                    screenWidth/2 - _graphics.PreferredBackBufferWidth/2,
+                    screenHeight/2 - _graphics.PreferredBackBufferHeight/2);
+            }
+        }
+        else _fullscreenPressed = false;
         
         foreach (var follower in _player.Followers) follower.Update(gameTime);
         _player.Update(gameTime);
@@ -252,15 +292,16 @@ public class Game1 : Game
         foreach (var tile in _tiles) tile.Draw(_spriteBatch, gameTime);
         foreach (var wall in _walls) wall.Draw(_spriteBatch, gameTime);
         
-        foreach (var follower in _player.Followers) follower.Draw(_spriteBatch, gameTime);
-        _player.Draw(_spriteBatch, gameTime);
         _yapperNPC.Draw(_spriteBatch, gameTime);
         
         _textDisplay.Draw(_spriteBatch, gameTime);
         _dialogueBox.Draw(_spriteBatch, gameTime);
         
         //_spriteBatch.DrawCircle(new CircleF(_camera.Center,4 * _renderScale),16,Color.Red,5);
-        _yapperTriggerArea.Draw(_spriteBatch, gameTime);
+        //_yapperTriggerArea.Draw(_spriteBatch, gameTime);
+        
+        foreach (var follower in _player.Followers) follower.Draw(_spriteBatch, gameTime);
+        _player.Draw(_spriteBatch, gameTime);
         
         _spriteBatch.End();
         

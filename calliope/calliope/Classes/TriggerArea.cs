@@ -19,6 +19,7 @@ public class TriggerArea(Rectangle area, Action linkedAction, Player player, boo
     public bool ConstantTrigger { get; set; } = constantTrigger;
     public Player Player { get; set; } = player;
     public float RenderScale { get; set; } = 1f;
+    public float RenderOrder { get; set; }
     public bool DrawDebugRects { get; set; } = false;
     private bool triggered = false;
 

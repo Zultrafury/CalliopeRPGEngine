@@ -17,6 +17,7 @@ public class TextDisplay(SpriteFont font, Vector2 position, float renderScale, s
     public SpriteFont Font {get; set;} = font;
     public string Text {get; set;} = text;
     public float RenderScale {get; set;} = renderScale;
+    public float RenderOrder { get; set; }
     public float Scale { get; set; } = 1;
     public bool Centered {get; set;}
     public bool CenteredY {get; set;}

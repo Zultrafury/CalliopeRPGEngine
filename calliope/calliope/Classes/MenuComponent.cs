@@ -25,6 +25,7 @@ public class MenuComponent : IUpdateDraw
     public Texture2D Background { get; set; }
     public TextDisplay Text { get; set; }
     public float RenderScale { get; set; }
+    public float RenderOrder { get; set; }
     public Action LinkedAction { get; set; }
 
     public MenuComponent(Vector2 offset, Vector2 size, float renderScale, string text, SpriteFont font, Texture2D border = null, Texture2D background = null)
@@ -35,7 +36,7 @@ public class MenuComponent : IUpdateDraw
         Text = new TextDisplay(font,Position*RenderScale,RenderScale,text)
         {
             Color = Color.White,
-            CenteredY = true
+            Centered = true
         };
         if (border != null) Border = border;
         if (background != null) Background = background;
@@ -43,7 +44,8 @@ public class MenuComponent : IUpdateDraw
     
     public void Update(GameTime gameTime)
     {
-        Text.Position = (Position+(Offset/2))-(new Vector2(Size.X,0)/2)*RenderScale+new Vector2(5f,0)*RenderScale;
+        if (Text.Centered) Text.Position = (Position+(Offset/2));
+        else Text.Position = (Position+(Offset/2))-(new Vector2(Size.X,0)/2)*RenderScale+new Vector2(5f,0)*RenderScale;
     }
 
     public MenuComponent Navigate(NavDirections direction)

@@ -36,6 +36,7 @@ public class Sprite : IUpdateDraw
     public int FrameRate { get; set; } = 100;
     public bool Playing { get; set; } = true;
     public float RenderScale { get; set; } = 1f;
+    public float RenderOrder { get; set; }
 
     protected bool nextFrame;
     protected int passedTime;

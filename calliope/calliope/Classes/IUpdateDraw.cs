@@ -7,6 +7,6 @@ public interface IUpdateDraw
 {
     public void Update(GameTime gameTime);
     public void Draw(SpriteBatch spriteBatch, GameTime gameTime);
-    
     public float RenderScale { get; set; }
+    public float RenderOrder { get; set; }
 }

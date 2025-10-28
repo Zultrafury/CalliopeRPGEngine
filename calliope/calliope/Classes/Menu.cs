@@ -11,6 +11,7 @@ namespace calliope.Classes;
 public class Menu : IUpdateDraw
 {
     public float RenderScale { get; set; }
+    public float RenderOrder { get; set; }
     public List<MenuComponent> Components { get; set; }
     public OrthographicCamera Camera { get; set; }
     public Vector2 Position { get; set; }
@@ -51,15 +52,15 @@ public class Menu : IUpdateDraw
         {
             if (!keyboard.IsKeyDown(Keys.D) && !keyboard.IsKeyDown(Keys.Right)) Navigate(MenuComponent.NavDirections.Right);
         }
-        else if (Keyboard.GetState().IsKeyDown(Keys.A) || Keyboard.GetState().IsKeyDown(Keys.Left))
+        if (Keyboard.GetState().IsKeyDown(Keys.A) || Keyboard.GetState().IsKeyDown(Keys.Left))
         {
             if (!keyboard.IsKeyDown(Keys.A) && !keyboard.IsKeyDown(Keys.Left)) Navigate(MenuComponent.NavDirections.Left);
         }
-        else if (Keyboard.GetState().IsKeyDown(Keys.S) || Keyboard.GetState().IsKeyDown(Keys.Down))
+        if (Keyboard.GetState().IsKeyDown(Keys.S) || Keyboard.GetState().IsKeyDown(Keys.Down))
         {
             if (!keyboard.IsKeyDown(Keys.S) && !keyboard.IsKeyDown(Keys.Down)) Navigate(MenuComponent.NavDirections.Down);
         }
-        else if (Keyboard.GetState().IsKeyDown(Keys.W) || Keyboard.GetState().IsKeyDown(Keys.Up))
+        if (Keyboard.GetState().IsKeyDown(Keys.W) || Keyboard.GetState().IsKeyDown(Keys.Up))
         {
             if (!keyboard.IsKeyDown(Keys.W) && !keyboard.IsKeyDown(Keys.Up)) Navigate(MenuComponent.NavDirections.Up);
         }

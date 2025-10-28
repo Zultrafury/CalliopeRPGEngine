@@ -24,6 +24,7 @@ public class DialogueBox : IUpdateDraw
     public Vector2 Size { get; set; }
     public float Padding { get; set; }
     public float RenderScale {get; set;}
+    public float RenderOrder { get; set; }
     public int ScrollDelay { get; set; }
     public TextDisplay TextDisplay { get; set; }
     public Texture2D PortraitTexture { get; set; } = null;

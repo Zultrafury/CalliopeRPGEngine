@@ -66,8 +66,12 @@ public class Player : Sprite, IUpdateDraw
             if (!statusMenuChange)
             {
                 StatusMenu.Active = !StatusMenu.Active;
-                
-                if (StatusMenu.Active) StatusMenu.Sounds["select"].Play();
+
+                if (StatusMenu.Active)
+                {
+                    StatusMenu.Sounds["select"].Play();
+                    AnimIndex = (int)AnimRange.X;
+                }
                 else StatusMenu.Sounds["back"].Play();
             }
             statusMenuChange = true;
@@ -128,6 +132,7 @@ public class Player : Sprite, IUpdateDraw
             }
             else Playing = false;
         }
+        else Playing = false;
 
         CalculateCollisionArea();
 
