@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
 using MonoGame.Extended;
+using Newtonsoft.Json;
 
 namespace calliope.Classes;
 
-public class MenuComponent : IUpdateDraw
+public class MenuComponent : IGameObject
 {
     public bool Selected { get; set; } = false;
     public enum NavDirections
@@ -17,16 +17,20 @@ public class MenuComponent : IUpdateDraw
         Left,
         Right
     }
-    public Dictionary<NavDirections, MenuComponent> Neighbors { get; set; } = new();
+    [JsonConverter(typeof(MenuComponentConverter))]
+    public Dictionary<NavDirections, uint> Neighbors { get; set; } = new();
     public Vector2 Position { get; set; }
     public Vector2 Offset {  get; set; }
     public Vector2 Size { get; set; }
     public Texture2D Border { get; set; }
     public Texture2D Background { get; set; }
     public TextDisplay Text { get; set; }
+    [JsonIgnore]
     public float RenderScale { get; set; }
     public float RenderOrder { get; set; }
-    public Action LinkedAction { get; set; }
+    public float UpdateOrder { get; set; }
+    public ICommand LinkedAction { get; set; }
+    public Dictionary<NavDirections, ICommand> DirectionalActions { get; set; } = null;
 
     public MenuComponent(Vector2 offset, Vector2 size, float renderScale, string text, SpriteFont font, Texture2D border = null, Texture2D background = null)
     {
@@ -41,7 +45,10 @@ public class MenuComponent : IUpdateDraw
         if (border != null) Border = border;
         if (background != null) Background = background;
     }
-    
+    [JsonIgnore]
+    public Scene Scene { get; set; }
+    public uint Id { get; set; }
+
     public void Update(GameTime gameTime)
     {
         if (Text.Centered) Text.Position = (Position+(Offset/2));
@@ -50,8 +57,10 @@ public class MenuComponent : IUpdateDraw
 
     public MenuComponent Navigate(NavDirections direction)
     {
-        if (!Neighbors.TryGetValue(direction, out var neighbor)) return null;
-        
+        if (DirectionalActions != null && DirectionalActions.TryGetValue(direction, out ICommand value)) value?.Execute();
+        if (!Neighbors.TryGetValue(direction, out var i)) return null;
+
+        var neighbor = (MenuComponent)Scene.Get(i,false);
         Selected = false;
         neighbor.Selected = true;
         return neighbor;
@@ -59,8 +68,8 @@ public class MenuComponent : IUpdateDraw
     
     public bool AddRelation(MenuComponent component, NavDirections direction)
     {
-        if (!Neighbors.TryAdd(direction, component)) return false;
-        component.Neighbors[InvertMoveDirection(direction)] = this;
+        if (!Neighbors.TryAdd(direction, component.Id)) return false;
+        component.Neighbors[InvertMoveDirection(direction)] = Id;
         return true;
     }
     

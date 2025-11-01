@@ -1,32 +1,31 @@
 ﻿using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Newtonsoft.Json;
 
 namespace calliope.Classes;
 
-public class Follower : Sprite, IUpdateDraw
+public class Follower : AnimatedSprite, IGameObject
 {
     public int Order { get; set; }
-    public Player Player { get; set; }
-    public Queue<(Player.MoveDirections,Vector2,int)> Positions { get; set; } = new();
-    private bool ignore;
+    private Queue<(Player.MoveDirections,Vector2,int)> Positions { get; set; } = new();
     private Queue<Player.MoveDirections> oldDirs = new();
+    private bool ignore;
     private Vector2 oldPos;
     
     public Follower(Texture2D spriteTexture, Vector2 position, int spriteWidth, int spriteHeight, int frameRate, Player player, int? order = null, float followingDistance = 1) :
         base(spriteTexture, position, spriteWidth, spriteHeight, frameRate)
     {
-        Player = player;
         oldPos = Position;
         
         if (order == null)
         {
-            Order = Player.Followers.Count;
+            Order = player.Followers.Count;
         }
         else Order = order.Value;
 
-        for (int i = 0; i < 3; i++) oldDirs.Enqueue(Player.Facing);
-        for (int i = 0; i < (Order + 1) * spriteWidth * followingDistance; i++) Positions.Enqueue((Player.Facing,Position,Player.FrameRate));
+        for (int i = 0; i < 3; i++) oldDirs.Enqueue(player.Facing);
+        for (int i = 0; i < (Order + 1) * spriteWidth * followingDistance; i++) Positions.Enqueue((player.Facing,Position,player.FrameRate));
     }
     
     public Follower(Texture2D spriteTexture, Vector2 position, Vector2 dimensions, int frameRate, Player player, int? order = null,  float followingDistance = 1) :
@@ -37,7 +36,7 @@ public class Follower : Sprite, IUpdateDraw
         if (oldPos == Position)
         {
             Playing = false;
-            AnimIndex = (int)AnimRange.X;
+            AnimIndex = AnimRange.X;
         }
         else Playing = true;
         
@@ -80,16 +79,16 @@ public class Follower : Sprite, IUpdateDraw
         switch (direction)
         {
             case Player.MoveDirections.Up:
-                AnimRange = new Vector2(4, 8);
+                AnimRange = AnimSets["walk_up"];
                 break;
             case Player.MoveDirections.Down:
-                AnimRange = new Vector2(0, 4);
+                AnimRange = AnimSets["walk_down"];
                 break;
             case Player.MoveDirections.Left:
-                AnimRange = new Vector2(12, 16);
+                AnimRange = AnimSets["walk_left"];
                 break;
             case Player.MoveDirections.Right:
-                AnimRange = new Vector2(8, 12);
+                AnimRange = AnimSets["walk_right"];
                 break;
         }
     }

@@ -1,21 +1,26 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using MonoGame.Extended;
+using Newtonsoft.Json;
 
 namespace calliope.Classes;
 
-public class Menu : IUpdateDraw
+public class Menu : IGameObject
 {
+    [JsonIgnore]
     public float RenderScale { get; set; }
-    public float RenderOrder { get; set; }
+    public float RenderOrder { get; set; } = 2000;
+    public float UpdateOrder { get; set; }
     public List<MenuComponent> Components { get; set; }
+    [JsonIgnore]
     public OrthographicCamera Camera { get; set; }
     public Vector2 Position { get; set; }
     public bool Active { get; set; }
+    [JsonIgnore]
     public Dictionary<string, SoundEffect> Sounds { get; set; } = new()
     {
         { "navigate", null },
@@ -25,14 +30,17 @@ public class Menu : IUpdateDraw
     
     private MenuComponent currentComponent;
     private KeyboardState keyboard = Keyboard.GetState();
-
-    public Menu(List<MenuComponent> components, OrthographicCamera camera = null)
+    public Menu(List<MenuComponent> components, float renderScale, OrthographicCamera camera = null)
     {
         Components = components;
+        RenderScale = renderScale;
         Camera = camera;
         currentComponent = Components[0];
         currentComponent.Selected = true;
     }
+    [JsonIgnore]
+    public Scene Scene { get; set; }
+    public uint Id { get; set; }
 
     public void Update(GameTime gameTime)
     {
@@ -79,7 +87,7 @@ public class Menu : IUpdateDraw
     {
         if (!Active) return;
         
-        foreach (var component in Components) component.Draw(spriteBatch, gameTime);
+        foreach (var component in Components.OrderBy(o => o.RenderOrder)) component.Draw(spriteBatch, gameTime);
         //spriteBatch.DrawCircle(Position,5*RenderScale,16,Color.Green,1*RenderScale);
     }
 
@@ -93,7 +101,7 @@ public class Menu : IUpdateDraw
     void Select()
     {
         Sounds["select"].Play();
-        currentComponent.LinkedAction?.Invoke();
+        currentComponent.LinkedAction?.Execute();
     }
     
     void Navigate(MenuComponent.NavDirections direction)
@@ -106,5 +114,33 @@ public class Menu : IUpdateDraw
             currentComponent = nextcomponent;
         }
         //else Sounds["back"].Play();
+    }
+
+    public void Open(int? reselectIndex = null)
+    {
+        keyboard = Keyboard.GetState();
+        Active = true;
+        if (reselectIndex != null)
+        {
+            Engage(reselectIndex.Value);
+        }
+    }
+
+    public void Close()
+    {
+        Active = false;
+    }
+
+    public void Engage(int index)
+    {
+        currentComponent.Selected = false;
+        currentComponent = Components[index];
+        currentComponent.Selected = true;
+    }
+    
+    public void SwapTo(Menu menu, int? reselectIndex = null)
+    {
+        Close();
+        menu.Open(reselectIndex);
     }
 }

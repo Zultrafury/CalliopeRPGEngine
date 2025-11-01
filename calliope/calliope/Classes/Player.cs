@@ -1,16 +1,18 @@
-﻿using System.Collections.Generic;
-using System.Net;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using MonoGame.Extended;
+using Newtonsoft.Json;
 
 namespace calliope.Classes;
 
 /// <summary>
 /// A sprite that is controlled by the user.
 /// </summary>
-public class Player : Sprite, IUpdateDraw
+public class Player : AnimatedSprite, IGameObject
 {
     private float _speed = 0.05f;
     public float Speed
@@ -22,10 +24,13 @@ public class Player : Sprite, IUpdateDraw
             runSpeed = Speed * 2;
         }
     }
-
+    [JsonIgnore]
     public bool Interacting { get; set; }
+    [JsonIgnore]
     public bool InteractPressed { get; set; }
+    [JsonIgnore]
     public OrthographicCamera Camera { get; set; }
+    [JsonIgnore]
     public Dictionary<string, string> Config { get; set; }
     public bool Frozen { get; set; }
     public enum MoveDirections
@@ -35,14 +40,19 @@ public class Player : Sprite, IUpdateDraw
         Left,
         Right
     }
+    [JsonIgnore]
     public MoveDirections Facing { get; set; }
+    [JsonIgnore]
     public RectangleF CollisionArea { get; set; }
+    [JsonIgnore]
     public RectangleF InteractArea { get; set; }
+    [JsonIgnore]
     public bool DrawDebugRects { get; set; } = false;
     public List<Follower> Followers { get; set; } = new();
     public Menu StatusMenu { get; set; }
+    public Menu CurrentMenu { get; set; }
 
-    private bool statusMenuChange = false;
+    private bool statusMenuChange;
     private float runSpeed;
     private float currentSpeed;
     
@@ -50,7 +60,7 @@ public class Player : Sprite, IUpdateDraw
         base(spriteTexture, position,spriteWidth,spriteHeight, frameRate)
     {
         runSpeed = Speed * 2;
-        Face(MoveDirections.Down);
+        UpdateOrder = -100f;
     }
     
     public Player(Texture2D spriteTexture, Vector2 position, Vector2 dimensions, int  frameRate) : 
@@ -65,20 +75,24 @@ public class Player : Sprite, IUpdateDraw
             
             if (!statusMenuChange)
             {
-                StatusMenu.Active = !StatusMenu.Active;
-
-                if (StatusMenu.Active)
+                if (CurrentMenu == null)
                 {
                     StatusMenu.Sounds["select"].Play();
-                    AnimIndex = (int)AnimRange.X;
+                    AnimIndex = AnimRange.X;
+                    SwapMenu(StatusMenu,0);
                 }
-                else StatusMenu.Sounds["back"].Play();
+                else
+                {
+                    StatusMenu.Sounds["back"].Play();
+                    SwapMenu(null);
+                }
             }
             statusMenuChange = true;
         }
         else statusMenuChange = false;
 
-        if (!StatusMenu.Active)
+        // No menu open - Free control
+        if (CurrentMenu == null)
         {
 
             // Interacting
@@ -141,17 +155,38 @@ public class Player : Sprite, IUpdateDraw
             new Vector2((float.Parse(Config["screenwidth"]) / 2), (float.Parse(Config["screenheight"]) / 2));
         
         StatusMenu.Update(gameTime);
+
+        List<AnimatedSprite> orderList =
+        [
+            this,
+            ..Followers
+        ];
+        orderList.Reverse();
+        float order = 0;
+
+        foreach (AnimatedSprite sprite in orderList.OrderBy(o => o.Position.Y))
+        {
+            sprite.RenderOrder = order;
+            order += 0.01f;
+        }
     }
     
     public new void Draw(SpriteBatch spriteBatch, GameTime gameTime)
     {
         base.Draw(spriteBatch, gameTime);
         
-        StatusMenu.Draw(spriteBatch, gameTime);
+        //StatusMenu.Draw(spriteBatch, gameTime);
         
         if (!DrawDebugRects) return;
         spriteBatch.DrawRectangle(CollisionArea,Color.Red,5);
         spriteBatch.DrawRectangle(InteractArea,Color.Blue,5);
+    }
+
+    public void SwapMenu(Menu menu, int? reselectIndex = null)
+    {
+        CurrentMenu?.Close();
+        CurrentMenu = menu;
+        CurrentMenu?.Open(reselectIndex);
     }
 
     public void Move(MoveDirections direction, GameTime gameTime, float modifier = 1f, MoveDirections? faceOverride = null)
@@ -189,22 +224,22 @@ public class Player : Sprite, IUpdateDraw
         switch (direction)
         {
             case MoveDirections.Up:
-                AnimRange = new Vector2(4, 8);
+                AnimRange = AnimSets["walk_up"];
                 Facing = MoveDirections.Up;
                 pos = new Vector2(Position.X - size.Width/2, Position.Y-size.Height);
                 break;
             case MoveDirections.Down:
-                AnimRange = new Vector2(0, 4);
+                AnimRange = AnimSets["walk_down"];
                 Facing = MoveDirections.Down;
                 pos = new Vector2(Position.X - size.Width/2, Position.Y);
                 break;
             case MoveDirections.Left:
-                AnimRange = new Vector2(12, 16);
+                AnimRange = AnimSets["walk_left"];
                 Facing = MoveDirections.Left;
                 pos = new Vector2(Position.X-size.Width, Position.Y - size.Height/2);
                 break;
             case MoveDirections.Right:
-                AnimRange = new Vector2(8, 12);
+                AnimRange = AnimSets["walk_right"];
                 Facing = MoveDirections.Right;
                 pos = new Vector2(Position.X, Position.Y - size.Height/2);
                 break;
@@ -224,12 +259,12 @@ public class Player : Sprite, IUpdateDraw
             new Vector2((float.Parse(Config["screenwidth"]) / 2), (float.Parse(Config["screenheight"]) / 2));
         
         //Reset Animation
-        AnimIndex = (int)AnimRange.X;
+        AnimIndex = AnimRange.X;
     }
 
     void CalculateCollisionArea()
     {
-        Point pSize = (SpriteDimensions * RenderScale).ToPoint();
+        Point pSize = (new Vector2(SpriteDimensions.X,SpriteDimensions.Y) * RenderScale).ToPoint();
         CollisionArea = new Rectangle(Position.ToPoint()-(pSize/new Point(2,2)), pSize);
     }
 

@@ -28,10 +28,17 @@
         <PackageReference Include="MonoGame.Content.Builder.Task" Version="3.8.*"/>
         <PackageReference Include="MonoGame.Library.OpenAL" Version="1.24.3.2" />
         <PackageReference Include="MonoGame.Library.SDL" Version="2.32.10.1" />
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
         <PackageReference Include="NVorbis" Version="0.10.5" />
     </ItemGroup>
     <ItemGroup>
       <Folder Include="Content\Assets\Sounds\" />
+    </ItemGroup>
+    <ItemGroup>
+      <None Remove="Content\config" />
+      <Content Include="Content\config">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
     </ItemGroup>
     <Target Name="RestoreDotnetTools" BeforeTargets="CollectPackageReferences">
         <Message Text="Restoring dotnet tools (this might take a while depending on your internet speed and should only happen upon building your project for the first time, or after upgrading MonoGame, or clearing your nuget cache)" Importance="High"/>

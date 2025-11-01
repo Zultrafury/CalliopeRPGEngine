@@ -1,8 +1,8 @@
-﻿using System;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using MonoGame.Extended;
+using Newtonsoft.Json;
 
 namespace calliope.Classes;
 
@@ -10,7 +10,7 @@ namespace calliope.Classes;
 /// A box made of rectangles and a <see cref="TextDisplay"/>.
 /// It reveals text (wrapped within its width) over time based on its delay, and has a LinkedAction that can execute a function once closed.
 /// </summary>
-public class DialogueBox : IUpdateDraw
+public class DialogueBox : IGameObject
 {
     private string _text;
 
@@ -23,18 +23,32 @@ public class DialogueBox : IUpdateDraw
     public Vector2 Position { get; set; }
     public Vector2 Size { get; set; }
     public float Padding { get; set; }
+    [JsonIgnore]
     public float RenderScale {get; set;}
-    public float RenderOrder { get; set; }
+    public float RenderOrder { get; set; } = 1999f;
+    public float UpdateOrder { get; set; }
+    [JsonIgnore]
+    public Scene Scene { get; set; }
+    public uint Id { get; set; }
     public int ScrollDelay { get; set; }
     public TextDisplay TextDisplay { get; set; }
     public Texture2D PortraitTexture { get; set; } = null;
-    public SoundEffect TextSoundEffect { get; set; } = null;
-    public SoundEffect CloseSoundEffect { get; set; } = null;
+    public SoundEffect TextSoundEffect { get; set; }
+    public SoundEffect CloseSoundEffect { get; set; }
     public bool Hidden { get; set; } = true;
-    public Player Player { get; set; }
-    public OrthographicCamera Camera { get; set; } = null;
-    public bool FreezePlayer { get; set; } = false;
-    public Action LinkedAction { get; set; }
+
+    private uint _player;
+    [JsonIgnore]
+    public Player Player
+    {
+        get => _player == 0 ? null : Scene.Get(_player).ToPlayer();
+        set => _player = value.Id;
+    }
+
+    [JsonIgnore]
+    public OrthographicCamera Camera { get; set; }
+    public bool FreezePlayer { get; set; }
+    public ICommand LinkedAction { get; set; }
     /// <summary>
     /// Some predefined ints for use with a <see cref="ScrollDelay"/>.
     /// </summary>
@@ -47,10 +61,10 @@ public class DialogueBox : IUpdateDraw
         ExtraFast = 10,
         Instant = 0
     }
-    
-    private bool finished = false;
-    private int progress = 0;
-    private int delay = 0;
+
+    private bool finished;
+    private int progress;
+    private int delay;
 
     /// <param name="font">The font for the internal <see cref="TextDisplay"/> to use.</param>
     /// <param name="textSoundEffect">The sound effect that plays when the text reveals (and by default, when the box closes).</param>
@@ -76,14 +90,11 @@ public class DialogueBox : IUpdateDraw
         CloseSoundEffect = textSoundEffect;
         
         Text = text;
-        
-        Initiate();
     }
 
     /// <summary>
     /// This updates the box. Call this in the update loop.
     /// </summary>
-    /// <param name="camera">The <see cref="OrthographicCamera"/> of the game.</param>
     /// <param name="gameTime">The <see cref="GameTime"/> of the game.</param>
     /// <seealso cref="Draw"/>
     public void Update(GameTime gameTime)
@@ -132,26 +143,25 @@ public class DialogueBox : IUpdateDraw
     /// Posts new dialogue to the dialogue box.
     /// </summary>
     /// <param name="text">New text to display. (Optional)</param>
-    /// <param name="linkTrigger">New link trigger to activate on box close. Set to "() => {}" for the box to have no trigger. (Optional)</param>
+    /// <param name="linkedAction">New linked action to activate on box close. Set to "() => {}" for the box to have no trigger. (Optional)</param>
     /// <param name="font">New font for the text to use. (Optional)</param>
     /// <param name="scrollDelay">New scroll delay for the text to use. (Optional)</param>
     /// <param name="freezePlayer"></param>
-    public void Initiate(string text = null, Action linkTrigger = null, SpriteFont font = null, int? scrollDelay = null, bool? freezePlayer = null)
+    public void Initiate(string text = null, ICommand linkedAction = null, SpriteFont font = null, int? scrollDelay = null, bool? freezePlayer = null)
     {
         progress = 0;
         finished = false;
         Hidden = false;
+        if (freezePlayer != null) FreezePlayer = freezePlayer.Value;
+        if (FreezePlayer && Player != null) Player.Frozen = true;
+
+        if (text == null) return;
+        Text = text;
+        TextDisplay.Text = "";
         
         if (font != null) TextDisplay.Font = font;
-        if (text != null)
-        {
-            Text = text;
-            TextDisplay.Text = "";
-        }
         if (scrollDelay != null) ScrollDelay = scrollDelay.Value;
-        if (linkTrigger != null) LinkedAction = linkTrigger;
-        if (freezePlayer != null) FreezePlayer = freezePlayer.Value;
-        if (FreezePlayer) Player.Frozen = true;
+        LinkedAction = linkedAction;
     }
 
     /// <summary>
@@ -212,7 +222,7 @@ public class DialogueBox : IUpdateDraw
         {
             Hidden = true;
             if (FreezePlayer) Player.Frozen = false;
-            LinkedAction?.Invoke();
+            LinkedAction?.Execute();
             CloseSoundEffect.Play();
             return;
         }

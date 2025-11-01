@@ -1,16 +1,20 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoGame.Extended;
+using Newtonsoft.Json;
 
 namespace calliope.Classes;
 
-public class Wall : Tile, IUpdateDraw
+public class Wall : Sprite, IGameObject
 {
+    [JsonIgnore]
     public Player Player { get; set; }
+    [JsonIgnore]
     public RectangleF Area { get; set; }
+    [JsonIgnore]
     public bool DrawDebugRects { get; set; } = false;
-    public Wall(Texture2D spriteTexture, int tile, Vector2 position, int spriteWidth, int spriteHeight, Player player, Rectangle? area = null) :
-        base(spriteTexture, tile, position, spriteWidth, spriteHeight)
+    public Wall(Texture2D spriteTexture, Vector2 position, int spriteWidth, int spriteHeight, Player player, int costume, Rectangle? area = null) :
+        base(spriteTexture, position, spriteWidth, spriteHeight, costume)
     {
         Player = player;
         RenderScale = player.RenderScale;
@@ -18,13 +22,13 @@ public class Wall : Tile, IUpdateDraw
         if (area != null) Area = area.Value;
         else
         {
-            Point size = (SpriteDimensions * RenderScale).ToPoint();
+            Point size = (new Vector2(SpriteDimensions.X,SpriteDimensions.Y) * RenderScale).ToPoint();
             Area = new Rectangle(Position.ToPoint() - (size / new Point(2, 2)), size);
         }
     }
 
-    public Wall(Texture2D spriteTexture, int tile, Vector2 position, Vector2 dimensions, Player player, Rectangle? area = null) : 
-        this(spriteTexture, tile, position, (int)dimensions.X, (int)dimensions.Y, player, area) {}
+    public Wall(Texture2D spriteTexture, Vector2 position, Vector2 dimensions, Player player, int costume, Rectangle? area = null) : 
+        this(spriteTexture, position, (int)dimensions.X, (int)dimensions.Y, player, costume, area) {}
 
     public new void Update(GameTime gameTime)
     {

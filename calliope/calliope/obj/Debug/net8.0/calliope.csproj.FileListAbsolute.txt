@@ -75,3 +75,6 @@ E:\Coding\Neumont\Capstone\CalliopeRPGEngine\calliope\calliope\bin\Debug\net8.0\
 E:\Coding\Neumont\Capstone\CalliopeRPGEngine\calliope\calliope\bin\Debug\net8.0\Content\Assets\Sounds\accept.xnb
 E:\Coding\Neumont\Capstone\CalliopeRPGEngine\calliope\calliope\bin\Debug\net8.0\Content\Assets\Sounds\deny.xnb
 E:\Coding\Neumont\Capstone\CalliopeRPGEngine\calliope\calliope\bin\Debug\net8.0\Content\Assets\Sounds\ding.xnb
+E:\Coding\Neumont\Capstone\CalliopeRPGEngine\calliope\calliope\bin\Debug\net8.0\Content\config
+E:\Coding\Neumont\Capstone\CalliopeRPGEngine\calliope\calliope\bin\Debug\net8.0\Newtonsoft.Json.dll
+E:\Coding\Neumont\Capstone\CalliopeRPGEngine\calliope\calliope\obj\Debug\net8.0\mgcb.tool.restore

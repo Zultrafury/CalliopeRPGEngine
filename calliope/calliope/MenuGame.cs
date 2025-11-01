@@ -81,27 +81,25 @@ public class MenuGame : Game
         LoadAsset("Assets/Sounds/accept");
         LoadAsset("Assets/Sounds/deny");
 
-        List<MenuComponent> components = new();
-        MenuComponent comp;
-        comp = new MenuComponent(new Vector2(-200, 0), new Vector2(80, 50), _renderScale, "Box", _fonts["GamerFont"]);
-        components.Add(comp);
+        //using var game = new MainGame();
+        
+        List<MenuComponent> components =
+        [
+            new (new Vector2(0, 0), new Vector2(80, 50), _renderScale, "Start", _fonts["GamerFont"])
+            {
+                //LinkedAction = () => game.Run()
+            },
+            new (new Vector2(0, 0), new Vector2(80, 50), _renderScale, "Exit", _fonts["GamerFont"])
+            {
+                LinkedAction = new CommandGameExit(this)
+            }
+        ];
 
-        comp = new MenuComponent(new Vector2(0, 0), new Vector2(80, 50), _renderScale, "Box", _fonts["GamerFont"]);
-        components.Add(comp);
-        
-        comp = new MenuComponent(new Vector2(200, 0), new Vector2(80, 50), _renderScale, "Box", _fonts["GamerFont"]);
-        components.Add(comp);
-        
-        statusMenu = new Menu(components)
-        {
-            RenderScale = _renderScale,
-            Camera = _camera
-        };
+        statusMenu = new Menu(components,_renderScale,_camera);
         
         statusMenu.SetSounds(_sfx["ding"], _sfx["accept"], _sfx["deny"]);
         
-        statusMenu.Components[0].AddRelation(statusMenu.Components[1],MenuComponent.NavDirections.Right);
-        statusMenu.Components[1].AddRelation(statusMenu.Components[2],MenuComponent.NavDirections.Right);
+        statusMenu.Components[0].AddRelation(statusMenu.Components[1],MenuComponent.NavDirections.Down);
     }
 
     protected override void Update(GameTime gameTime)

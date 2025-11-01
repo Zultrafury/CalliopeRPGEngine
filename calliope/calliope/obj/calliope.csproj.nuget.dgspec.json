@@ -74,6 +74,10 @@
             "NVorbis": {
               "target": "Package",
               "version": "[0.10.5, )"
+            },
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[13.0.4, )"
             }
           },
           "imports": [
