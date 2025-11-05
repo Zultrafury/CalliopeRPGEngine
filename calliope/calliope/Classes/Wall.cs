@@ -1,4 +1,6 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System;
+using System.Collections.Generic;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoGame.Extended;
 using Newtonsoft.Json;
@@ -13,6 +15,7 @@ public class Wall : Sprite, IGameObject
     public RectangleF Area { get; set; }
     [JsonIgnore]
     public bool DrawDebugRects { get; set; } = false;
+    [JsonConstructor]
     public Wall(Texture2D spriteTexture, Vector2 position, int spriteWidth, int spriteHeight, Player player, int costume, Rectangle? area = null) :
         base(spriteTexture, position, spriteWidth, spriteHeight, costume)
     {
@@ -56,5 +59,33 @@ public class Wall : Sprite, IGameObject
         
         if (!DrawDebugRects) return;
         spriteBatch.DrawRectangle(Area,Color.Red,5);
+    }
+}
+
+public class WallConverter : JsonConverter
+{
+    public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+    {
+        serializer.Serialize(writer, value);
+        return;
+        if (value is not Wall wall)
+        {
+            serializer.Serialize(writer, value);
+            return;
+        }
+
+        writer.WriteStartObject();
+        writer.WritePropertyName("a");
+        writer.WriteEndObject();
+    }
+    
+    public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+    {
+        return serializer.Deserialize<IDictionary<MenuComponent.NavDirections, MenuComponent>>(reader);
+    }
+
+    public override bool CanConvert(Type objectType)
+    {
+        return objectType == typeof(Wall);
     }
 }

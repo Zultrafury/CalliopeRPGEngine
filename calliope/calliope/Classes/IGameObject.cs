@@ -26,6 +26,7 @@ public static class IGameObjectExtensions
     
     public static Menu ToMenu(this IGameObject obj) => Convert<Menu>(obj);
     public static Player ToPlayer(this IGameObject obj) => Convert<Player>(obj);
+    public static Follower ToFollower(this IGameObject obj) => Convert<Follower>(obj);
     public static TextDisplay ToTextDisplay(this IGameObject obj) => Convert<TextDisplay>(obj);
     public static AnimatedSprite ToAnimatedSprite(this IGameObject obj) => Convert<AnimatedSprite>(obj);
     public static DialogueBox ToDialogueBox(this IGameObject obj) => Convert<DialogueBox>(obj);

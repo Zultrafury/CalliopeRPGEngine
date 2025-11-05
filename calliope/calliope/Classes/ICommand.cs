@@ -49,24 +49,30 @@ public class CommandMenuSwapTo(Menu menu, Menu newMenu, int? reselectIndex = nul
 
 public class CommandMenuOpen(Menu menu, int? index = null) : ICommand
 {
-    [JsonIgnore] Menu Menu = menu;
+    [JsonIgnore] private Scene Scene = menu.Scene;
+    [JsonIgnore] uint Menu = menu.Id;
     [JsonProperty] int? Index { get; set; } = index;
-    public void Execute() => Menu.Open(Index);
+    public void Execute() => Scene.Get(Menu,false).ToMenu().Open(Index);
 }
 
 public class CommandPlayerSwapMenu(Player player, Menu menu, int? reselectIndex = null) : ICommand
 {
-    [JsonIgnore] Player Player = player;
+    [JsonIgnore] private Scene Scene = player.Scene;
+    [JsonIgnore] uint Player = player.Id;
     [JsonProperty] uint Menu { get; set; } = menu.Id;
     [JsonProperty] int? ReselectIndex { get; set; } = reselectIndex;
-    public void Execute() => Player.SwapMenu(player.Scene.Get(Menu,false).ToMenu(),ReselectIndex);
+
+    public void Execute()
+    {
+        Scene.Get(Player,false).ToPlayer().SwapMenu(player.Scene.Get(Menu, false).ToMenu(), ReselectIndex);
+    }
 }
 
-public class CommandSceneManagerChangeScene(SceneManager sceneManager, string scene) : ICommand
+public class CommandSceneManagerChangeScene(SceneManager sceneManager, string scene, bool reload = true) : ICommand
 {
     [JsonIgnore] SceneManager SceneManager = sceneManager;
     [JsonProperty] string Scene { get; set; } = scene;
-    public void Execute() => SceneManager.ChangeScene(Scene);
+    public void Execute() => SceneManager.ChangeScene(Scene, reload);
 }
 
 public class CommandGameExit(Game game) : ICommand

@@ -7,6 +7,7 @@ namespace calliope.Classes;
 
 public class Follower : AnimatedSprite, IGameObject
 {
+    [JsonIgnore]
     public int Order { get; set; }
     private Queue<(Player.MoveDirections,Vector2,int)> Positions { get; set; } = new();
     private Queue<Player.MoveDirections> oldDirs = new();

@@ -13,9 +13,9 @@ public class SceneManager
         set => Scenes[CurrentScene] = value;
     }
 
-    public void ChangeScene(string scene)
+    public void ChangeScene(string scene, bool reload = true)
     {
         CurrentScene = scene;
-        Scenes[CurrentScene].Start();
+        Scenes[CurrentScene].Start(reload);
     }
 }

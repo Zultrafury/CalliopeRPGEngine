@@ -48,6 +48,7 @@ public class Player : AnimatedSprite, IGameObject
     public RectangleF InteractArea { get; set; }
     [JsonIgnore]
     public bool DrawDebugRects { get; set; } = false;
+
     public List<Follower> Followers { get; set; } = new();
     public Menu StatusMenu { get; set; }
     public Menu CurrentMenu { get; set; }
@@ -169,11 +170,14 @@ public class Player : AnimatedSprite, IGameObject
             sprite.RenderOrder = order;
             order += 0.01f;
         }
+
+        foreach (var f in Followers) f.Update(gameTime);
     }
     
     public new void Draw(SpriteBatch spriteBatch, GameTime gameTime)
     {
         base.Draw(spriteBatch, gameTime);
+        foreach (var f in Followers) f.Draw(spriteBatch, gameTime);
         
         //StatusMenu.Draw(spriteBatch, gameTime);
         

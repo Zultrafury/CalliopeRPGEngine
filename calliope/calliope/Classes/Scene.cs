@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -9,10 +8,14 @@ namespace calliope.Classes;
 
 public class Scene
 {
+    private string FilePath { get; set; }
+
     [JsonProperty]
     private StaticGameObjectContainer StaticObjects { get; set; } = new();
     [JsonProperty]
-    private List<IGameObject> Objects { get; } = new();
+    private List<IGameObject> Objects { get; set; } = new();
+    [JsonIgnore]
+    private (StaticGameObjectContainer StaticObjectContainer, List<IGameObject> Objects) SavedScene { get; set; } = (null,null);
     public ICommand StartAction { get; set; }
     private uint nextId = 1;
 
@@ -22,6 +25,8 @@ public class Scene
         
         if (objects == null) return;
         foreach (IGameObject o in objects) Add(o);
+        
+        SavedScene = (null,null);
     }
 
     public void Add(IGameObject obj)
@@ -113,7 +118,10 @@ public class Scene
                 // Handle Player
                 case Player player:
                 {
-                    foreach (Follower f in player.Followers) if (f.Id == id) return f;
+                    foreach (Follower f in player.Followers)
+                    {
+                        if (f.Id == id) return f;
+                    }
                     break;
                 }
             }
@@ -141,8 +149,16 @@ public class Scene
         foreach (var gameObject in objects.OrderBy(o => o.RenderOrder)) gameObject.Draw(spriteBatch,gameTime);
     }
 
-    public void Start()
+    public void Start(bool reload)
     {
+        //if (SavedScene == (null,null)) SavedScene = (StaticObjects.Clone, [..Objects]);
+        if (false)
+        {
+            Clear();
+            Objects = new (SavedScene.Objects);
+            StaticObjects = SavedScene.StaticObjectContainer;
+        }
+        
         StartAction?.Execute();
     }
 }
