@@ -31,6 +31,11 @@ public class TriggerArea(Rectangle area, ICommand linkedAction, Player player, b
     public Scene Scene { get; set; }
     public uint Id { get; set; }
 
+    public void SceneInit(Scene scene)
+    {
+        Scene = scene;
+    }
+
     /// <summary>
     /// This updates the area. Call this in the update loop.
     /// </summary>

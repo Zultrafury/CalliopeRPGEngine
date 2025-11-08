@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("calliope")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+88b83eddbd8c43b713440f224155d872ab0ead29")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b917b212a3b353782acd774b9f83ceb956ccd03f")]
 [assembly: System.Reflection.AssemblyProductAttribute("calliope")]
 [assembly: System.Reflection.AssemblyTitleAttribute("calliope")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

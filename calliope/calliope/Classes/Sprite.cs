@@ -67,6 +67,11 @@ public class Sprite : IGameObject
     public Sprite(Texture2D spriteTexture, Vector2 position, Vector2 dimensions, int costume = 0) :
         this(spriteTexture, position, (int)dimensions.X, (int)dimensions.Y, costume) {}
 
+    public void SceneInit(Scene scene)
+    {
+        Scene = scene;
+    }
+
     /// <summary>
     /// This updates the sprite (but does nothing!)
     /// </summary>

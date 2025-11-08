@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using MonoGame.Extended;
 using Newtonsoft.Json;
 
 namespace calliope.Classes;
@@ -9,11 +11,15 @@ namespace calliope.Classes;
 public class Scene
 {
     private string FilePath { get; set; }
-
-    [JsonProperty]
-    private StaticGameObjectContainer StaticObjects { get; set; } = new();
+    [JsonIgnore]
+    public OrthographicCamera Camera { get; set; }
+    [JsonIgnore]
+    public Dictionary<string, string> Config { get; set; } 
+    public uint Player { get; set; }
     [JsonProperty]
     private List<IGameObject> Objects { get; set; } = new();
+    [JsonProperty]
+    private StaticGameObjectContainer StaticObjects { get; set; } = new();
     [JsonIgnore]
     private (StaticGameObjectContainer StaticObjectContainer, List<IGameObject> Objects) SavedScene { get; set; } = (null,null);
     public ICommand StartAction { get; set; }
@@ -34,7 +40,7 @@ public class Scene
         void Register(IGameObject o)
         {
             //Console.WriteLine(o.GetType().Name+": "+nextId);
-            o.Scene = this;
+            o.SceneInit(this);
             o.Id = nextId;
             nextId++;
         }
@@ -70,6 +76,7 @@ public class Scene
             // Handle Player
             case Player player:
             {
+                Player = player.Id;
                 foreach (Follower f in player.Followers) Register(f);
                 break;
             }

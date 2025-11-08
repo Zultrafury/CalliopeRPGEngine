@@ -92,6 +92,11 @@ public class DialogueBox : IGameObject
         Text = text;
     }
 
+    public void SceneInit(Scene scene)
+    {
+        Scene = scene;
+    }
+
     /// <summary>
     /// This updates the box. Call this in the update loop.
     /// </summary>

@@ -49,6 +49,11 @@ public class MenuComponent : IGameObject
     public Scene Scene { get; set; }
     public uint Id { get; set; }
 
+    public void SceneInit(Scene scene)
+    {
+        Scene = scene;
+    }
+
     public void Update(GameTime gameTime)
     {
         if (Text.Centered) Text.Position = (Position+(Offset/2));

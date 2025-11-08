@@ -26,6 +26,11 @@ public class TextDisplay(SpriteFont font, Vector2 position, float renderScale, s
     [JsonIgnore]
     public Scene Scene { get; set; }
     public uint Id { get; set; }
+    public void SceneInit(Scene scene)
+    {
+        Scene = scene;
+    }
+
     public void Update(GameTime gameTime) {}
 
     public void Draw(SpriteBatch _spriteBatch, GameTime gameTime)

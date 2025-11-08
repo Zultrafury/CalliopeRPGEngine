@@ -81,7 +81,12 @@ public class AnimatedSprite : IGameObject
     /// <param name="frameRate">The sprite animation speed in millisecond delay between frames.</param>
     public AnimatedSprite(Texture2D spriteTexture, Vector2 position, Vector2 dimensions, int frameRate) :
         this(spriteTexture, position, (int)dimensions.X, (int)dimensions.Y, frameRate) {}
-    
+
+
+    public void SceneInit(Scene scene)
+    {
+        Scene = scene;
+    }
 
     /// <summary>
     /// This updates the sprite (but does nothing!)

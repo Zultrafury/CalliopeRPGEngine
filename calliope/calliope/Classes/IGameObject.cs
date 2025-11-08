@@ -11,9 +11,9 @@ public interface IGameObject
     public float RenderScale { get; set; }
     public float RenderOrder { get; set; }
     public float UpdateOrder { get; set; }
+    public void SceneInit(Scene scene);
     public void Update(GameTime gameTime);
     public void Draw(SpriteBatch spriteBatch, GameTime gameTime);
-    
 }
 
 public static class IGameObjectExtensions

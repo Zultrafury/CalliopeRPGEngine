@@ -42,6 +42,11 @@ public class Menu : IGameObject
     public Scene Scene { get; set; }
     public uint Id { get; set; }
 
+    public void SceneInit(Scene scene)
+    {
+        Scene = scene;
+    }
+
     public void Update(GameTime gameTime)
     {
         if (!Active)

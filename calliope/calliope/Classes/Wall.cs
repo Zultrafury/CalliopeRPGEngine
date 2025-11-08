@@ -16,22 +16,23 @@ public class Wall : Sprite, IGameObject
     [JsonIgnore]
     public bool DrawDebugRects { get; set; } = false;
     [JsonConstructor]
-    public Wall(Texture2D spriteTexture, Vector2 position, int spriteWidth, int spriteHeight, Player player, int costume, Rectangle? area = null) :
+    public Wall(Texture2D spriteTexture, Vector2 position, int spriteWidth, int spriteHeight, int costume, Rectangle? area = null) :
         base(spriteTexture, position, spriteWidth, spriteHeight, costume)
     {
-        Player = player;
-        RenderScale = player.RenderScale;
-        
         if (area != null) Area = area.Value;
-        else
-        {
-            Point size = (new Vector2(SpriteDimensions.X,SpriteDimensions.Y) * RenderScale).ToPoint();
-            Area = new Rectangle(Position.ToPoint() - (size / new Point(2, 2)), size);
-        }
+        else RecalculateArea();
     }
 
-    public Wall(Texture2D spriteTexture, Vector2 position, Vector2 dimensions, Player player, int costume, Rectangle? area = null) : 
-        this(spriteTexture, position, (int)dimensions.X, (int)dimensions.Y, player, costume, area) {}
+    public Wall(Texture2D spriteTexture, Vector2 position, Vector2 dimensions, int costume, Rectangle? area = null) : 
+        this(spriteTexture, position, (int)dimensions.X, (int)dimensions.Y, costume, area) {}
+
+    public new void SceneInit(Scene scene)
+    {
+        base.SceneInit(scene);
+        Player = Scene.Get(Scene.Player).ToPlayer();
+        RenderScale = float.Parse(Scene.Config["renderscale"]);
+        RecalculateArea();
+    }
 
     public new void Update(GameTime gameTime)
     {
@@ -60,32 +61,34 @@ public class Wall : Sprite, IGameObject
         if (!DrawDebugRects) return;
         spriteBatch.DrawRectangle(Area,Color.Red,5);
     }
+
+    public void RecalculateArea()
+    {
+        Point size = (new Vector2(SpriteDimensions.X,SpriteDimensions.Y) * RenderScale).ToPoint();
+        Area = new Rectangle(Position.ToPoint() - (size / new Point(2, 2)), size);
+    }
 }
 
-public class WallConverter : JsonConverter
+/*public class WallConverter : JsonConverter
 {
     public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
     {
-        serializer.Serialize(writer, value);
-        return;
-        if (value is not Wall wall)
-        {
-            serializer.Serialize(writer, value);
-            return;
-        }
-
-        writer.WriteStartObject();
-        writer.WritePropertyName("a");
-        writer.WriteEndObject();
+        serializer.Serialize(writer, (Sprite)value);
     }
-    
+
     public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
     {
-        return serializer.Deserialize<IDictionary<MenuComponent.NavDirections, MenuComponent>>(reader);
+        existingValue ??= Activator.CreateInstance(objectType);
+        serializer.Populate(reader, existingValue);
+        return existingValue;
+        
+        var obj = serializer.Deserialize<Wall>(reader);
+        //obj.Player = obj.Scene.Get(obj.Scene.Player).ToPlayer();
+        return obj;
     }
 
     public override bool CanConvert(Type objectType)
     {
         return objectType == typeof(Wall);
     }
-}
+}*/

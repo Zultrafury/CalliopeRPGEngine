@@ -64,6 +64,7 @@ public class Player : AnimatedSprite, IGameObject
         UpdateOrder = -100f;
     }
     
+    [JsonConstructor]
     public Player(Texture2D spriteTexture, Vector2 position, Vector2 dimensions, int  frameRate) : 
         this(spriteTexture, position, (int)dimensions.X, (int)dimensions.Y, frameRate) {}
 
