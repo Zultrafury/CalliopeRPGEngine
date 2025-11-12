@@ -8,91 +8,97 @@ namespace calliope.Classes;
 
 public interface ICommand
 {
+    public static Scene Scene { get; set; }
+    public static SceneManager SceneManager { get; set; }
+    public static Game Game { get; set; }
+    
     public void Execute();
 }
 
-public class CommandDialogueBoxInitiate(DialogueBox dialogueBox, string text = null, 
-    ICommand linkedAction = null, SpriteFont font = null, int? scrollDelay = null, 
+public class CommandDialogueBoxInitiate(uint dialogueBoxId, string text = null, 
+    ICommand linkedAction = null, SpriteFontResource font = null, int? scrollDelay = null, 
     bool? freezePlayer = null) : ICommand
 {
-    [JsonIgnore] private Scene Scene = dialogueBox.Scene;
-    [JsonProperty] uint DialogueBox = dialogueBox.Id;
+    [JsonProperty] uint DialogueBoxId = dialogueBoxId;
     [JsonProperty] string Text { get; set; } = text;
     [JsonProperty] ICommand  LinkedAction { get; set; } = linkedAction;
-    [JsonIgnore] SpriteFont Font { get; set; } = font;
+    [JsonProperty] SpriteFontResource Font { get; set; } = font;
     [JsonProperty] int? ScrollDelay { get; set; } = scrollDelay;
     [JsonProperty] bool? FreezePlayer { get; set; } = freezePlayer;
-    public void Execute() => Scene.Get(DialogueBox).ToDialogueBox().Initiate(Text,LinkedAction,Font,ScrollDelay,FreezePlayer);
+
+    public void Execute()
+    {
+        ICommand.Scene.Get(DialogueBoxId).ToDialogueBox().Initiate(Text, LinkedAction, Font, ScrollDelay, FreezePlayer);
+    }
 }
 
-public class CommandMenuEngage(Menu menu, int index) : ICommand
+public class CommandMenuEngage(uint menuId, int index) : ICommand
 {
-    [JsonIgnore] Menu Menu = menu;
+    [JsonProperty] uint MenuId = menuId;
     [JsonProperty] int Index { get; set; } = index;
-    public void Execute() => Menu.Engage(Index);
+    
+    public void Execute() => ICommand.Scene.Get(MenuId).ToMenu().Engage(Index);
 }
 
-public class CommandMenuSwapTo(Menu menu, Menu newMenu, int? reselectIndex = null) : ICommand
+public class CommandMenuSwapTo(uint menuId, uint newMenuId, int? reselectIndex = null) : ICommand
 {
-    [JsonIgnore] private Scene Scene = menu.Scene;
-    [JsonProperty] private uint Menu { get; set; } = menu.Id;
-    [JsonProperty] uint NewMenu { get; set; } = newMenu.Id;
+    [JsonProperty] uint MenuId = menuId;
+    [JsonProperty] uint NewMenuId = newMenuId;
     [JsonProperty] int? ReselectIndex { get; set; } = reselectIndex;
 
     public void Execute()
     {
-        Menu menu = Scene.Get(Menu,false).ToMenu();
-        Menu newMenu = Scene.Get(NewMenu,false).ToMenu();
+        Menu menu = ICommand.Scene.Get(MenuId,false).ToMenu();
+        Menu newMenu = ICommand.Scene.Get(NewMenuId,false).ToMenu();
         menu.SwapTo(newMenu, ReselectIndex);
     }
 }
 
-public class CommandMenuOpen(Menu menu, int? index = null) : ICommand
+public class CommandMenuOpen(uint menuId, int? index = null) : ICommand
 {
-    [JsonIgnore] private Scene Scene = menu.Scene;
-    [JsonIgnore] uint Menu = menu.Id;
+    [JsonProperty] uint MenuId = menuId;
     [JsonProperty] int? Index { get; set; } = index;
-    public void Execute() => Scene.Get(Menu,false).ToMenu().Open(Index);
+    
+    public void Execute() => ICommand.Scene.Get(MenuId,false).ToMenu().Open(Index);
 }
 
-public class CommandPlayerSwapMenu(Player player, Menu menu, int? reselectIndex = null) : ICommand
+public class CommandPlayerSwapMenu(uint playerId, uint menuId, int? reselectIndex = null) : ICommand
 {
-    [JsonIgnore] private Scene Scene = player.Scene;
-    [JsonIgnore] uint Player = player.Id;
-    [JsonProperty] uint Menu { get; set; } = menu.Id;
+    [JsonProperty] uint PlayerId = playerId;
+    [JsonProperty] uint MenuId { get; set; } = menuId;
     [JsonProperty] int? ReselectIndex { get; set; } = reselectIndex;
 
     public void Execute()
     {
-        Scene.Get(Player,false).ToPlayer().SwapMenu(player.Scene.Get(Menu, false).ToMenu(), ReselectIndex);
+        Player player = ICommand.Scene.Get(PlayerId,false).ToPlayer();
+        player.SwapMenu(MenuId, ReselectIndex);
     }
 }
 
-public class CommandSceneManagerChangeScene(SceneManager sceneManager, string scene, bool reload = true) : ICommand
+public class CommandSceneManagerChangeScene(string scene, bool reload = true) : ICommand
 {
-    [JsonIgnore] SceneManager SceneManager = sceneManager;
-    [JsonProperty] string Scene { get; set; } = scene;
-    public void Execute() => SceneManager.ChangeScene(Scene, reload);
+    [JsonProperty] string SceneName { get; set; } = scene;
+    [JsonProperty] private bool Reload { get; set; } = reload;
+    
+    public void Execute() => ICommand.SceneManager.ChangeScene(SceneName, Reload);
 }
 
-public class CommandGameExit(Game game) : ICommand
+public class CommandGameExit : ICommand
 {
-    [JsonIgnore] Game Game = game;
-    public void Execute() => Game.Exit();
+    public void Execute() => ICommand.Game.Exit();
 }
 
 public class CommandSoundEffectMasterVolumeChange(float amount, 
-    TextDisplay textDisplay, SoundEffect soundEffect) : ICommand
+    uint textDisplayId, SoundEffectResource soundEffect) : ICommand
 {
-    [JsonIgnore] private Scene Scene = textDisplay.Scene;
     [JsonProperty] float Amount { get; set; } = amount;
-    [JsonProperty] uint TextDisplay { get; set; } = textDisplay.Id;
-    [JsonIgnore] SoundEffect SoundEffect { get; set; } = soundEffect;
+    [JsonProperty] uint TextDisplayId { get; set; } = textDisplayId;
+    [JsonProperty] SoundEffectResource Sfx { get; set; } = soundEffect;
 
     public void Execute()
     {
-        SoundEffect?.Play();
+        Sfx?.SoundEffect.Play();
         SoundEffect.MasterVolume = Math.Clamp(SoundEffect.MasterVolume + Amount,0,1);
-        Scene.Get(TextDisplay,false).ToTextDisplay().Text = Math.Round(SoundEffect.MasterVolume*100)+"%";
+        ICommand.Scene.Get(TextDisplayId,false).ToTextDisplay().Text = Math.Round(SoundEffect.MasterVolume*100)+"%";
     }
 }

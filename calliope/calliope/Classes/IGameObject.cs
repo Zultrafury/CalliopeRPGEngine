@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Newtonsoft.Json;
 
@@ -30,4 +31,25 @@ public static class IGameObjectExtensions
     public static TextDisplay ToTextDisplay(this IGameObject obj) => Convert<TextDisplay>(obj);
     public static AnimatedSprite ToAnimatedSprite(this IGameObject obj) => Convert<AnimatedSprite>(obj);
     public static DialogueBox ToDialogueBox(this IGameObject obj) => Convert<DialogueBox>(obj);
+    public static Sprite ToSprite(this IGameObject obj) => Convert<Sprite>(obj);
+    public static MenuComponent ToMenuComponent(this IGameObject obj) => Convert<MenuComponent>(obj);
+}
+
+public class IGameObjectConverter : JsonConverter
+{
+    public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+    {
+        var obj = value as IGameObject;
+        writer.WriteValue(value);
+    }
+
+    public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+    {
+        return (IGameObject)reader.Value;
+    }
+
+    public override bool CanConvert(Type objectType)
+    {
+        return objectType == typeof(IGameObject);
+    }
 }

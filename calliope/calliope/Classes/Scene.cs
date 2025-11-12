@@ -1,38 +1,49 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoGame.Extended;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace calliope.Classes;
 
 public class Scene
 {
-    private string FilePath { get; set; }
+    [JsonIgnore] public OrthographicCamera Camera { get; set; }
+
     [JsonIgnore]
-    public OrthographicCamera Camera { get; set; }
-    [JsonIgnore]
-    public Dictionary<string, string> Config { get; set; } 
+    public Dictionary<string, string> Config { get; set; } = new();
+
     public uint Player { get; set; }
     [JsonProperty]
     private List<IGameObject> Objects { get; set; } = new();
     [JsonProperty]
     private StaticGameObjectContainer StaticObjects { get; set; } = new();
-    [JsonIgnore]
-    private (StaticGameObjectContainer StaticObjectContainer, List<IGameObject> Objects) SavedScene { get; set; } = (null,null);
     public ICommand StartAction { get; set; }
     private uint nextId = 1;
 
+    [JsonConstructor]
     public Scene(List<IGameObject> objects = null, ICommand startAction = null)
     {
         StartAction = startAction;
+        var configfile = File.ReadAllLines("Content/config");
+        foreach (var line in configfile)
+        {
+            //Console.WriteLine(line);
+            Config.Add(line.Split('=')[0], line.Split('=')[1]);
+        }
         
         if (objects == null) return;
         foreach (IGameObject o in objects) Add(o);
-        
-        SavedScene = (null,null);
+    }
+
+    public void InitializeAll()
+    {
+        foreach (var o in Objects) o.SceneInit(this);
+        foreach (var o in StaticObjects.Objects) o.SceneInit(this);
     }
 
     public void Add(IGameObject obj)
@@ -41,6 +52,7 @@ public class Scene
         {
             //Console.WriteLine(o.GetType().Name+": "+nextId);
             o.SceneInit(this);
+            if (o.Id != 0) return;
             o.Id = nextId;
             nextId++;
         }
@@ -61,7 +73,7 @@ public class Scene
                 foreach (MenuComponent o in menu.Components)
                 {
                     Register(o);
-                    Register(o.Text);
+                    Register(o.TextDisplay);
                 }
                 break;
             }
@@ -110,7 +122,7 @@ public class Scene
                     foreach (MenuComponent o in menu.Components)
                     {
                         if (o.Id == id) return o;
-                        if (o.Text.Id == id) return o.Text;
+                        if (o.TextDisplay.Id == id) return o.TextDisplay;
                     }
                     break;
                 }
@@ -159,13 +171,15 @@ public class Scene
     public void Start(bool reload)
     {
         //if (SavedScene == (null,null)) SavedScene = (StaticObjects.Clone, [..Objects]);
-        if (false)
+        /*if (false)
         {
             Clear();
             Objects = new (SavedScene.Objects);
             StaticObjects = SavedScene.StaticObjectContainer;
-        }
-        
+        }*/
+
+        ICommand.Scene = this;
+        InitializeAll();
         StartAction?.Execute();
     }
 }

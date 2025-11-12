@@ -1,4 +1,6 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System;
+using System.Net.Mime;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using MonoGame.Extended;
@@ -20,7 +22,7 @@ public class DialogueBox : IGameObject
         set => _text = EvaluateLength(value);
     }
 
-    public Vector2 Position { get; set; }
+    public Vector2 Offset { get; set; }
     public Vector2 Size { get; set; }
     public float Padding { get; set; }
     [JsonIgnore]
@@ -33,8 +35,8 @@ public class DialogueBox : IGameObject
     public int ScrollDelay { get; set; }
     public TextDisplay TextDisplay { get; set; }
     public Texture2D PortraitTexture { get; set; } = null;
-    public SoundEffect TextSoundEffect { get; set; }
-    public SoundEffect CloseSoundEffect { get; set; }
+    public SoundEffectResource TextSoundEffect { get; set; }
+    public SoundEffectResource CloseSoundEffect { get; set; }
     public bool Hidden { get; set; } = true;
 
     private uint _player;
@@ -68,22 +70,20 @@ public class DialogueBox : IGameObject
 
     /// <param name="font">The font for the internal <see cref="TextDisplay"/> to use.</param>
     /// <param name="textSoundEffect">The sound effect that plays when the text reveals (and by default, when the box closes).</param>
-    /// <param name="renderScale">The render scaling amount.</param>
     /// <param name="text">The text to display.</param>
     /// <param name="scrollDelay">The text reveal speed in millisecond delay between characters.</param>
-    /// <param name="position">The position of the box.</param>
+    /// <param name="offset">The offset  of the box.</param>
     /// <param name="size">The size (width and height) of the box.</param>
     /// <param name="padding">The amount of horizontal padding between the box border and the <see cref="TextDisplay"/>.</param>
-    public DialogueBox(SpriteFont font, SoundEffect textSoundEffect, float renderScale, string text, int scrollDelay, Vector2 position, Vector2 size, float padding)
+    public DialogueBox(SpriteFontResource font, SoundEffectResource textSoundEffect, string text, int scrollDelay, Vector2 offset, Vector2 size, float padding)
     {
-        TextDisplay = new TextDisplay(font, position,renderScale, "")
+        TextDisplay = new TextDisplay(font, offset, "")
         {
             Color = Color.White
         };
         
         Size = size;
-        Position = position;
-        RenderScale = renderScale;
+        Offset = offset;
         ScrollDelay = scrollDelay;
         Padding = padding;
         TextSoundEffect = textSoundEffect;
@@ -95,6 +95,9 @@ public class DialogueBox : IGameObject
     public void SceneInit(Scene scene)
     {
         Scene = scene;
+        Player = Scene.Get(Scene.Player).ToPlayer();
+        Camera = Scene.Camera;
+        RenderScale = float.Parse(Scene.Config["renderscale"]);
     }
 
     /// <summary>
@@ -106,8 +109,9 @@ public class DialogueBox : IGameObject
     {
         if (Player.InteractPressed) Advance();
         
-        Position = Camera.Center + new Vector2(0,3 * Camera.BoundingRectangle.Size.Height/10);
-        TextDisplay.Position = Position - new Vector2(Size.X/2-Padding,Size.Y/2);
+        var size = Size * Camera.BoundingRectangle.Size;
+        var position = Camera.Center + new Vector2(0,3 * Camera.BoundingRectangle.Size.Height/10);
+        TextDisplay.Position = position - new Vector2(size.X/2-(Padding*Camera.BoundingRectangle.Size.Width),size.Y/2);
         delay += gameTime.ElapsedGameTime.Milliseconds;
         if (delay > ScrollDelay && finished == false)
         {
@@ -115,7 +119,7 @@ public class DialogueBox : IGameObject
             if (progress >= Text.Length) finished = true;
             else
             {
-                TextSoundEffect.Play();
+                TextSoundEffect.SoundEffect.Play();
                 do
                 {
                     progress++;
@@ -137,9 +141,10 @@ public class DialogueBox : IGameObject
     public void Draw(SpriteBatch spriteBatch, GameTime gameTime)
     {
         if (Hidden) return;
-        
-        spriteBatch.FillRectangle(new Vector2(Position.X-(Size.X/2), Position.Y-(Size.Y/2)), new SizeF(Size.X, Size.Y), Color.Black);
-        spriteBatch.DrawRectangle(new Vector2(Position.X-(Size.X/2), Position.Y-(Size.Y/2)), new SizeF(Size.X, Size.Y), Color.White,10*(RenderScale/8));
+        var position = Camera.Center + new Vector2(0, 3 * Camera.BoundingRectangle.Size.Height / 10) + Offset;
+        var size = Size * Camera.BoundingRectangle.Size;
+        spriteBatch.FillRectangle(new Vector2(position.X-(size.X/2), position.Y-(size.Y/2)), size, Color.Black);
+        spriteBatch.DrawRectangle(new Vector2(position.X-(size.X/2), position.Y-(size.Y/2)), size, Color.White,10*(RenderScale/8));
         
         TextDisplay.Draw(spriteBatch, gameTime);
     }
@@ -152,7 +157,7 @@ public class DialogueBox : IGameObject
     /// <param name="font">New font for the text to use. (Optional)</param>
     /// <param name="scrollDelay">New scroll delay for the text to use. (Optional)</param>
     /// <param name="freezePlayer"></param>
-    public void Initiate(string text = null, ICommand linkedAction = null, SpriteFont font = null, int? scrollDelay = null, bool? freezePlayer = null)
+    public void Initiate(string text = null, ICommand linkedAction = null, SpriteFontResource font = null, int? scrollDelay = null, bool? freezePlayer = null)
     {
         progress = 0;
         finished = false;
@@ -160,6 +165,7 @@ public class DialogueBox : IGameObject
         if (freezePlayer != null) FreezePlayer = freezePlayer.Value;
         if (FreezePlayer && Player != null) Player.Frozen = true;
 
+        Text = EvaluateLength();
         if (text == null) return;
         Text = text;
         TextDisplay.Text = "";
@@ -174,25 +180,29 @@ public class DialogueBox : IGameObject
     /// </summary>
     /// <param name="text">The text for the box to evaluate.</param>
     /// <returns>The text with LF (\n) characters placed properly to wrap the text in the box.</returns>
-    public string EvaluateLength(string text)
+    public string EvaluateLength(string text = null)
     {
         //Console.WriteLine("Evaluating length");
         //"I'm talking! Isn't that great? Yapping is\nseriously my favorite! Like, totes cool and\nstuff..."
         //"I'm talking! Isn't that great? Yapping is seriously my favorite! Like, totes cool and stuff..."
+
+        text ??= Text;
+        if (TextDisplay.Font == null || Camera == null) return text;
         
         string result = "";
         
         int skimmer = 1;
         int startIndex = 0;
         string lastValid = "";
+        var size = Size * Camera.BoundingRectangle.Size;
 
         while (skimmer <= text.Length)
         {
             if (skimmer == text.Length || text.ToCharArray()[skimmer] == ' ')
             {
                 var current = text[startIndex..skimmer];
-                float width = TextDisplay.Font.MeasureString(current).X * (RenderScale/8);
-                if (width < Size.X - Padding)
+                float width = TextDisplay.Font.Font.MeasureString(current).X * (RenderScale/8);
+                if (width < size.X - (Padding * Camera.BoundingRectangle.Size.Width))
                 {
                     lastValid = current;
                 }
@@ -228,11 +238,11 @@ public class DialogueBox : IGameObject
             Hidden = true;
             if (FreezePlayer) Player.Frozen = false;
             LinkedAction?.Execute();
-            CloseSoundEffect.Play();
+            CloseSoundEffect.SoundEffect.Play();
             return;
         }
         
-        TextSoundEffect.Play();
+        TextSoundEffect.SoundEffect.Play();
         progress = Text.Length - 1;
     }
 }

@@ -16,21 +16,20 @@ public class Wall : Sprite, IGameObject
     [JsonIgnore]
     public bool DrawDebugRects { get; set; } = false;
     [JsonConstructor]
-    public Wall(Texture2D spriteTexture, Vector2 position, int spriteWidth, int spriteHeight, int costume, Rectangle? area = null) :
+    public Wall(TextureResource spriteTexture, Vector2 position, int spriteWidth, int spriteHeight, int costume, RectangleF? area = null) :
         base(spriteTexture, position, spriteWidth, spriteHeight, costume)
     {
         if (area != null) Area = area.Value;
         else RecalculateArea();
     }
 
-    public Wall(Texture2D spriteTexture, Vector2 position, Vector2 dimensions, int costume, Rectangle? area = null) : 
+    public Wall(TextureResource spriteTexture, Vector2 position, Vector2 dimensions, int costume, RectangleF? area = null) : 
         this(spriteTexture, position, (int)dimensions.X, (int)dimensions.Y, costume, area) {}
 
     public new void SceneInit(Scene scene)
     {
         base.SceneInit(scene);
         Player = Scene.Get(Scene.Player).ToPlayer();
-        RenderScale = float.Parse(Scene.Config["renderscale"]);
         RecalculateArea();
     }
 
@@ -39,6 +38,7 @@ public class Wall : Sprite, IGameObject
         if (!Area.Intersects(Player.CollisionArea)) return;
         
         var intersection = RectangleF.Intersection(Area, Player.CollisionArea);
+        intersection.Size /= RenderScale;
         
         if (intersection.Width < intersection.Height)
         {
@@ -64,8 +64,8 @@ public class Wall : Sprite, IGameObject
 
     public void RecalculateArea()
     {
-        Point size = (new Vector2(SpriteDimensions.X,SpriteDimensions.Y) * RenderScale).ToPoint();
-        Area = new Rectangle(Position.ToPoint() - (size / new Point(2, 2)), size);
+        Vector2 size = new Vector2(SpriteDimensions.X,SpriteDimensions.Y) * RenderScale;
+        Area = new RectangleF(Position * RenderScale - (size / new Vector2(2, 2)), size);
     }
 }
 

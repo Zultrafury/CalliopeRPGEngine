@@ -13,7 +13,7 @@ namespace calliope.Classes;
 /// <param name="linkedAction">The function to call once entered.</param>
 /// <param name="player">The player to check for overlaps.</param>
 /// <param name="constantTrigger">Whether to constantly call the function (true) or only call it once when entered (false).</param>
-public class TriggerArea(Rectangle area, ICommand linkedAction, Player player, bool constantTrigger) : IGameObject
+public class TriggerArea(RectangleF area, ICommand linkedAction, Player player, bool constantTrigger) : IGameObject
 {
     public RectangleF Area { get; set; } = area;
     public ICommand LinkedAction { get; set; } = linkedAction;
@@ -34,6 +34,8 @@ public class TriggerArea(Rectangle area, ICommand linkedAction, Player player, b
     public void SceneInit(Scene scene)
     {
         Scene = scene;
+        Player = Scene.Get(Scene.Player).ToPlayer();
+        RenderScale = float.Parse(Scene.Config["renderscale"]);
     }
 
     /// <summary>
@@ -43,7 +45,8 @@ public class TriggerArea(Rectangle area, ICommand linkedAction, Player player, b
     /// <seealso cref="Draw"/>
     public void Update(GameTime gameTime)
     {
-        if (!Area.Intersects(Player.CollisionArea))
+        var area = new RectangleF(Area.Position * RenderScale,Area.Size * RenderScale);
+        if (!area.Intersects(Player.CollisionArea))
         {
             triggered = false;
             return;
@@ -69,6 +72,7 @@ public class TriggerArea(Rectangle area, ICommand linkedAction, Player player, b
     public void Draw(SpriteBatch spriteBatch, GameTime gameTime)
     {
         if (!DrawDebugRects) return;
-        spriteBatch.DrawRectangle(Area,Color.Red,5);
+        var area = new RectangleF(Area.Position * RenderScale,Area.Size * RenderScale);
+        spriteBatch.DrawRectangle(area,Color.Red,5);
     }
 }

@@ -20,8 +20,8 @@ public class MenuGame : Game
     private SpriteBatch _spriteBatch;
     private float _renderScale = 1.0f;
     private Dictionary<string,Texture2D> _textures = new();
-    private Dictionary<string,SpriteFont> _fonts = new();
-    private Dictionary<string,SoundEffect> _sfx = new();
+    private Dictionary<string,SpriteFontResource> _fonts = new();
+    private Dictionary<string,SoundEffectResource> _sfx = new();
 
     private Menu statusMenu;
 
@@ -85,17 +85,17 @@ public class MenuGame : Game
         
         List<MenuComponent> components =
         [
-            new (new Vector2(0, 0), new Vector2(80, 50), _renderScale, "Start", _fonts["GamerFont"])
+            new (new Vector2(0, 0), new Vector2(80, 50), "Start", _fonts["GamerFont"])
             {
                 //LinkedAction = () => game.Run()
             },
-            new (new Vector2(0, 0), new Vector2(80, 50), _renderScale, "Exit", _fonts["GamerFont"])
+            new (new Vector2(0, 0), new Vector2(80, 50), "Exit", _fonts["GamerFont"])
             {
-                LinkedAction = new CommandGameExit(this)
+                LinkedAction = new CommandGameExit()
             }
         ];
 
-        statusMenu = new Menu(components,_renderScale,_camera);
+        statusMenu = new Menu(components,_camera);
         
         statusMenu.SetSounds(_sfx["ding"], _sfx["accept"], _sfx["deny"]);
         
@@ -140,13 +140,13 @@ public class MenuGame : Game
         else if (name[..13] == "Assets/Fonts/")
         {
             string alias = name[13..];
-            _fonts[alias] = Content.Load<SpriteFont>(name);
+            _fonts[alias] = new SpriteFontResource(name);
             if (output) Console.WriteLine($"SpriteFont {alias} loaded!");
         }
         else if (name[..14] == "Assets/Sounds/")
         {
             string alias = name[14..];
-            _sfx[alias] = Content.Load<SoundEffect>(name);
+            _sfx[alias] = new SoundEffectResource(name);
             if (output) Console.WriteLine($"SoundEffect {alias} loaded!");
         }
         else if (output) Console.WriteLine($"Type of {name} not found.");

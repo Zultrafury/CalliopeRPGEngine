@@ -11,6 +11,7 @@ using Microsoft.Xna.Framework.Media;
 using MonoGame.Extended;
 using MonoGame.Extended.ViewportAdapters;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
 namespace calliope;
 
@@ -23,16 +24,13 @@ public class MainGame : Game
     private float _renderScale = 1.0f;
     private bool _fullscreenPressed;
 
-    private Dictionary<string, Texture2D> _textures = new();
-    private Dictionary<string, SpriteFont> _fonts = new();
-    private Dictionary<string, SoundEffect> _sfx = new();
-
     private SceneManager _sceneManager = new();
 
     public MainGame()
     {
         _graphics = new GraphicsDeviceManager(this);
         Content.RootDirectory = "Content";
+        EngineResources.Content = Content;
         IsMouseVisible = true;
         
         // --- CONFIG FILE ---
@@ -76,41 +74,47 @@ public class MainGame : Game
 
     protected override void LoadContent()
     {
+        _sceneManager.Camera = _camera;
+        ICommand.SceneManager = _sceneManager;
+        ICommand.Game = this;
         _spriteBatch = new SpriteBatch(GraphicsDevice);
         
         // Assets
         // TEXTURES
-        LoadAsset("Assets/Images/basechar");
-        LoadAsset("Assets/Images/basetiles");
+        EngineResources.LoadAsset("Assets/Images/basechar");
+        EngineResources.LoadAsset("Assets/Images/basetiles");
         
         // FONTS
-        LoadAsset("Assets/Fonts/GamerFont");
-        LoadAsset("Assets/Fonts/ArialFont");
+        EngineResources.LoadAsset("Assets/Fonts/GamerFont");
+        EngineResources.LoadAsset("Assets/Fonts/ArialFont");
         
         // SFX
-        LoadAsset("Assets/Sounds/ding");
-        LoadAsset("Assets/Sounds/accept");
-        LoadAsset("Assets/Sounds/deny");
+        EngineResources.LoadAsset("Assets/Sounds/ding");
+        EngineResources.LoadAsset("Assets/Sounds/accept");
+        EngineResources.LoadAsset("Assets/Sounds/deny");
         
-        string path = "jsontext.json";
-        if (true)
+        ICommand.SceneManager.Path = "jsontext.json";
+        if (false)
         {
-            // -- GAME SCENE --
-            BuildGameScene("game");
-        
             // -- MAIN MENU SCENE --
             BuildMainMenuScene("mainmenu");
             
+            // -- GAME SCENE --
+            BuildGameScene("game");
+
+            /*var converters = EngineResources.Converters;
+            converters.Add(new IGameObjectConverter());*/
             var json = JsonConvert.SerializeObject(_sceneManager.Scenes, Formatting.Indented,
-                new JsonSerializerSettings()
+                new JsonSerializerSettings
                 {
-                    TypeNameHandling = TypeNameHandling.Objects
+                    TypeNameHandling = TypeNameHandling.Auto,
+                    Converters = EngineResources.Converters
                 });
 
             try
             {
-                File.WriteAllText("jsontext.json", json);
-                Console.WriteLine($"Content successfully written to {path}");
+                File.WriteAllText(ICommand.SceneManager.Path, json);
+                Console.WriteLine($"Content successfully written to {ICommand.SceneManager.Path}");
             }
             catch (IOException ex)
             {
@@ -119,16 +123,20 @@ public class MainGame : Game
         }
         else
         {
-            _sceneManager.Scenes =
-                JsonConvert.DeserializeObject<Dictionary<string, Scene>>(File.ReadAllText(path),
+            var scenes =
+                JsonConvert.DeserializeObject<Dictionary<string, Scene>>(File.ReadAllText(ICommand.SceneManager.Path),
                     new JsonSerializerSettings()
                     {
-                        TypeNameHandling = TypeNameHandling.Objects
+                        TypeNameHandling = TypeNameHandling.Auto,
+                        Converters = EngineResources.Converters
                     });
-            Console.WriteLine($"Content successfully read from {path}");
+            _sceneManager.Scenes = scenes;
+            
+            Console.WriteLine($"Content successfully read from {ICommand.SceneManager.Path}");
         }
 
         _sceneManager.ChangeScene("mainmenu");
+        Console.WriteLine(_sceneManager.CurrentScene);
     }
 
     protected override void Update(GameTime gameTime)
@@ -171,6 +179,7 @@ public class MainGame : Game
         else _fullscreenPressed = false;
         
         _sceneManager.Scene.Update(gameTime);
+        //Console.WriteLine("Menu camera pos: " + _camera.Position);
         
         base.Update(gameTime);
     }
@@ -189,36 +198,11 @@ public class MainGame : Game
         
         base.Draw(gameTime);
     }
-    
-    void LoadAsset(string name, bool output = false)
-    {
-        if (output) Console.WriteLine($"Loading asset {name}...");
-        if (name[..14] == "Assets/Images/")
-        {
-            string alias = name[14..];
-            _textures[alias] = Content.Load<Texture2D>(name);
-            if (output) Console.WriteLine($"Texture2D {alias} loaded!");
-        }
-        else if (name[..13] == "Assets/Fonts/")
-        {
-            string alias = name[13..];
-            _fonts[alias] = Content.Load<SpriteFont>(name);
-            if (output) Console.WriteLine($"SpriteFont {alias} loaded!");
-        }
-        else if (name[..14] == "Assets/Sounds/")
-        {
-            string alias = name[14..];
-            _sfx[alias] = Content.Load<SoundEffect>(name);
-            if (output) Console.WriteLine($"SoundEffect {alias} loaded!");
-        }
-        else if (output) Console.WriteLine($"Type of {name} not found.");
-    }
 
     void BuildGameScene(string sceneName)
     {
         Scene scene = _sceneManager.Scenes[sceneName] = new() {
             Camera = _camera,
-            Config = _config
         };
         
         // Player
@@ -230,36 +214,33 @@ public class MainGame : Game
             { "walk_right", new (8, 12) }
         };
         
-        var _player = new Player(_textures["basechar"],
-            new Vector2((float.Parse(_config["screenwidth"])/2)-16, (float.Parse(_config["screenheight"])/2)-16)*_renderScale,
+        var _player = new Player(EngineResources.Textures["basechar"],
+            new Vector2((float.Parse(_config["screenwidth"])/2)-16, (float.Parse(_config["screenheight"])/2)-16),
             16,16,150)
         {
-            RenderScale = _renderScale,
             Camera = scene.Camera,
             Config =  _config,
             AnimSets = basecharAnimSets
         };
-        scene.Add(_player);
 
         for (int i = 0; i < 2; i++)
         {
-            Follower follower = new Follower(_textures["basechar"], _player.Position, new(16, 16), 150, null, 
+            Follower follower = new Follower(EngineResources.Textures["basechar"], _player.Position, new(16, 16), 150, null, 
                 1.5f * (float.Parse(_config["framerate"])/60))
             {
-                RenderScale = _renderScale,
                 AnimSets = basecharAnimSets
             };
-            scene.Get(scene.Player).ToPlayer().Followers.Add(follower);
+            _player.Followers.Add(follower);
         }
+        scene.Add(_player);
 
         
         // YAPPER XD
         
-        var _yapperNPC = new AnimatedSprite(_textures["basechar"], new Vector2(),new (16,16), 50)
+        var _yapperNPC = new AnimatedSprite(EngineResources.Textures["basechar"], new Vector2(),new (16,16), 50)
         {
-            Position = new Vector2(0, 16)*_renderScale,
+            Position = new Vector2(0, 16),
             AnimRange = new (8, 12),
-            RenderScale = _renderScale
         };
         
         scene.Add(_yapperNPC);
@@ -269,26 +250,25 @@ public class MainGame : Game
         {
             for (int j = 0; j < 32; j++)
             {
-                scene.Add(new Sprite(_textures["basetiles"],new Vector2(i*16, j*16)*_renderScale,
+                scene.Add(new Sprite(EngineResources.Textures["basetiles"],new Vector2(i*16, j*16),
                      new(16, 16), Random.Shared.Next(3))
                 {
-                    RenderScale = _renderScale,
                     RenderOrder = -101
                 });
             }
         }
-        scene.Add(new Sprite(Sprite.GeneratePlaceholder(GraphicsDevice,32,32), 
+        /*scene.Add(new Sprite(Sprite.GeneratePlaceholder(GraphicsDevice,32,32), 
             new Vector2(8, -24)*_renderScale, new(32, 32),0)
         {
             RenderScale = _renderScale,
             RenderOrder = -101
-        });
+        });*/
 
         for (int i = -2; i < 0; i++)
         {
             for (int j = 1; j < 31; j++)
             {
-                scene.Add(new Wall(_textures["basetiles"], new Vector2(i * 16, j * 16) * _renderScale, 
+                scene.Add(new Wall(EngineResources.Textures["basetiles"], new Vector2(i * 16, j * 16), 
                     new(16, 16), 3)
                 {
                     RenderOrder = -100
@@ -297,13 +277,13 @@ public class MainGame : Game
         }
         for (int j = 0; j < 32; j++)
         {
-            scene.Add(new Wall(_textures["basetiles"], new Vector2(-4 * 16, j * 16) * _renderScale, 
+            scene.Add(new Wall(EngineResources.Textures["basetiles"], new Vector2(-4 * 16, j * 16), 
                 new(16, 16), 3)
             {
                 RenderOrder = -100
             });
         }
-        scene.Add(new Wall(_textures["basetiles"], new Vector2(-3 * 16, -1 * 16) * _renderScale, 
+        scene.Add(new Wall(EngineResources.Textures["basetiles"], new Vector2(-3 * 16, -1 * 16), 
             new(16, 16), 3)
         {
             RenderOrder = -100
@@ -315,8 +295,7 @@ public class MainGame : Game
         });
         
         // Dialogue box + text
-
-        var _textDisplay = new TextDisplay(_fonts["GamerFont"], new Vector2(),_renderScale,"Text!\nAlso text...")
+        var _textDisplay = new TextDisplay(EngineResources.Fonts["GamerFont"], new Vector2(),"Text!\nAlso text...")
         {
             Position = scene.Camera.Center,
             Centered = true,
@@ -325,29 +304,28 @@ public class MainGame : Game
         };
         scene.Add(_textDisplay);
 
-        var _dialogueBox = new DialogueBox(_fonts["GamerFont"], _sfx["ding"], _renderScale,
+        var _dialogueBox = new DialogueBox(EngineResources.Fonts["GamerFont"], EngineResources.Sfx["ding"],
             "* I'm talking! Isn't that great? Yapping is seriously my favorite! Like, totes cool and stuff...",
-            (int)DialogueBox.TextSpeeds.Normal, scene.Camera.Center,
-            new Vector2(4 * scene.Camera.BoundingRectangle.Size.Width / 5, 0.225f * scene.Camera.BoundingRectangle.Size.Height),
-            (4 * scene.Camera.BoundingRectangle.Size.Width) / 250)
+            (int)DialogueBox.TextSpeeds.Normal, new Vector2(0,0),
+            new Vector2(4.0f / 5.0f, 0.225f),
+            4f / 250f)
         {
-            CloseSoundEffect = _sfx["accept"],
+            CloseSoundEffect = EngineResources.Sfx["accept"],
             Player = _player,
             Camera = scene.Camera,
             FreezePlayer = true
         };
         scene.Add(_dialogueBox);
-        _dialogueBox.LinkedAction = new CommandDialogueBoxInitiate(_dialogueBox,"* My dialogue is so freakin' epic.", null,
-            _fonts["ArialFont"], (int)DialogueBox.TextSpeeds.Slow, false);
-        _dialogueBox.Initiate();
+        _dialogueBox.LinkedAction = new CommandDialogueBoxInitiate(_dialogueBox.Id,"* My dialogue is so freakin' epic.", null,
+            EngineResources.Fonts["ArialFont"], (int)DialogueBox.TextSpeeds.Slow, false);
 
         // Triggers
         
-        Point yapSize = (new Vector2(_yapperNPC.SpriteDimensions.X,_yapperNPC.SpriteDimensions.Y) * _renderScale).ToPoint();
+        Point yapSize = (new Vector2(_yapperNPC.SpriteDimensions.X,_yapperNPC.SpriteDimensions.Y)).ToPoint();
         Rectangle yapRect = new(_yapperNPC.Position.ToPoint()-yapSize/new Point(2,2), yapSize);
-        CommandDialogueBoxInitiate yap = new(_dialogueBox,"* Letting me yap? Great! Nothing beats even MORE yapping! Y'know, it's my favorite thing to do and whatnot sooo... Yeah!" + 
+        CommandDialogueBoxInitiate yap = new(_dialogueBox.Id,"* Letting me yap? Great! Nothing beats even MORE yapping! Y'know, it's my favorite thing to do and whatnot sooo... Yeah!" + 
                                                     "\nGosh, if I yapped any more, my mouth would fall off! For realsies!", null,
-            _fonts["GamerFont"], (int)DialogueBox.TextSpeeds.Normal, true);
+            EngineResources.Fonts["GamerFont"], (int)DialogueBox.TextSpeeds.Normal, true);
 
         var _yapperTriggerArea = new InteractTriggerArea(yapRect, yap, _player);
         scene.Add(_yapperTriggerArea);
@@ -356,13 +334,13 @@ public class MainGame : Game
         // OPTIONS MENU
         List<MenuComponent> components =
         [
-            new (new Vector2(-150, -160), new Vector2(100, 25), _renderScale, "SFX Volume", _fonts["GamerFont"]),
-            new (new Vector2(-170, 150), new Vector2(80, 25), _renderScale, "Back", _fonts["GamerFont"]),
-            new (new Vector2(50, -160), new Vector2(40, 25), _renderScale, Math.Round(SoundEffect.MasterVolume*100)+"%", _fonts["GamerFont"])
+            new (new Vector2(-150, -160), new Vector2(100, 25), "SFX Volume", EngineResources.Fonts["GamerFont"]),
+            new (new Vector2(-170, 150), new Vector2(80, 25), "Back", EngineResources.Fonts["GamerFont"]),
+            new (new Vector2(50, -160), new Vector2(40, 25), Math.Round(SoundEffect.MasterVolume*100)+"%", EngineResources.Fonts["GamerFont"])
         ];
 
-        Menu _optionsMenu = new Menu(components, _renderScale, scene.Camera);
-        _optionsMenu.SetSounds(_sfx["ding"], _sfx["accept"], _sfx["deny"]);
+        Menu _optionsMenu = new Menu(components, scene.Camera);
+        _optionsMenu.SetSounds(EngineResources.Sfx["ding"], EngineResources.Sfx["accept"], EngineResources.Sfx["deny"]);
         scene.Add(_optionsMenu);
         
         _optionsMenu.Components[0].AddRelation(_optionsMenu.Components[1],MenuComponent.NavDirections.Down);
@@ -370,21 +348,21 @@ public class MainGame : Game
         // STATUS MENU
         components =
         [
-            new (new Vector2(-170, -160), new Vector2(80, 25), _renderScale, "Items", _fonts["GamerFont"]),
-            new (new Vector2(-170, -100), new Vector2(80, 25), _renderScale, "Save", _fonts["GamerFont"]),
-            new (new Vector2(-170, -40), new Vector2(80, 25), _renderScale, "Options", _fonts["GamerFont"])
+            new (new Vector2(-170, -160), new Vector2(80, 25), "Items", EngineResources.Fonts["GamerFont"]),
+            new (new Vector2(-170, -100), new Vector2(80, 25), "Save", EngineResources.Fonts["GamerFont"]),
+            new (new Vector2(-170, -40), new Vector2(80, 25), "Options", EngineResources.Fonts["GamerFont"])
             {
-                LinkedAction = new CommandPlayerSwapMenu(_player,_optionsMenu,0)
+                LinkedAction = new CommandPlayerSwapMenu(_player.Id,_optionsMenu.Id,0)
             },
-            new (new Vector2(-170, 150), new Vector2(80, 25), _renderScale, "Exit", _fonts["GamerFont"])
+            new (new Vector2(-170, 150), new Vector2(80, 25), "Exit", EngineResources.Fonts["GamerFont"])
             {
-                LinkedAction = new CommandSceneManagerChangeScene(_sceneManager,"mainmenu")
+                LinkedAction = new CommandSceneManagerChangeScene("mainmenu")
             }
 
         ];
 
-        Menu _statusMenu = new Menu(components, _renderScale, scene.Camera);
-        _statusMenu.SetSounds(_sfx["ding"], _sfx["accept"], _sfx["deny"]);
+        Menu _statusMenu = new Menu(components, scene.Camera);
+        _statusMenu.SetSounds(EngineResources.Sfx["ding"], EngineResources.Sfx["accept"], EngineResources.Sfx["deny"]);
         scene.Add(_statusMenu);
         
         _statusMenu.Components[0].AddRelation(_statusMenu.Components[1],MenuComponent.NavDirections.Down);
@@ -392,32 +370,33 @@ public class MainGame : Game
         _statusMenu.Components[2].AddRelation(_statusMenu.Components[3],MenuComponent.NavDirections.Down);
         
         // OPTIONS MENU ACTIONS
-        _optionsMenu.Components[0].LinkedAction = new CommandMenuEngage(_optionsMenu,2);
-        _optionsMenu.Components[1].LinkedAction = new CommandPlayerSwapMenu(_player,_statusMenu);
-        _optionsMenu.Components[2].LinkedAction = new CommandMenuEngage(_optionsMenu,0);
+        _optionsMenu.Components[0].LinkedAction = new CommandMenuEngage(_optionsMenu.Id,2);
+        _optionsMenu.Components[1].LinkedAction = new CommandPlayerSwapMenu(_player.Id,_statusMenu.Id);
+        _optionsMenu.Components[2].LinkedAction = new CommandMenuEngage(_optionsMenu.Id,0);
         _optionsMenu.Components[2].DirectionalActions = new()
         {
             {
                 MenuComponent.NavDirections.Up,
-                new CommandSoundEffectMasterVolumeChange(0.05f,_optionsMenu.Components[2].Text,_sfx["accept"])
+                new CommandSoundEffectMasterVolumeChange(0.05f,_optionsMenu.Components[2].TextDisplay.Id,EngineResources.Sfx["accept"])
             },
             {
                 MenuComponent.NavDirections.Down,
-                new CommandSoundEffectMasterVolumeChange(-0.05f,_optionsMenu.Components[2].Text,_sfx["deny"])
+                new CommandSoundEffectMasterVolumeChange(-0.05f,_optionsMenu.Components[2].TextDisplay.Id,EngineResources.Sfx["deny"])
             }
         };
         
         // STATUS MENU REGISTRY
-        scene.Get(_player.Id).ToPlayer().StatusMenu =  _statusMenu;
+        scene.Get(_player.Id).ToPlayer().StatusMenu =  _statusMenu.Id;
         scene.Get(_player.Id).ToPlayer().Interacting = true;
         scene.Get(_player.Id).ToPlayer().InteractPressed = false;
+        
+        scene.StartAction = new CommandDialogueBoxInitiate(_dialogueBox.Id);
     }
 
     void BuildMainMenuScene(string sceneName)
     {
         Scene scene = _sceneManager.Scenes[sceneName] = new() { 
             Camera = _camera,
-            Config = _config
         };
         
         // Menus
@@ -425,18 +404,18 @@ public class MainGame : Game
         // MAIN MENU
         List<MenuComponent> components =
         [
-            new (new Vector2(-185, 150), new Vector2(80, 25), _renderScale, "New Game", _fonts["GamerFont"]),
-            new (new Vector2(-45, 150), new Vector2(40, 25), _renderScale, "Load", _fonts["GamerFont"]),
-            new (new Vector2(85, 150), new Vector2(60, 25), _renderScale, "Options", _fonts["GamerFont"]),
-            new (new Vector2(215, 150), new Vector2(40, 25), _renderScale, "Exit", _fonts["GamerFont"]),
-            new (new Vector2(0, 150), new Vector2(275, 35), _renderScale, "", _fonts["GamerFont"])
+            new (new Vector2(-185, 150), new Vector2(80, 25), "New Game", EngineResources.Fonts["GamerFont"]),
+            new (new Vector2(-45, 150), new Vector2(40, 25), "Load", EngineResources.Fonts["GamerFont"]),
+            new (new Vector2(85, 150), new Vector2(60, 25), "Options", EngineResources.Fonts["GamerFont"]),
+            new (new Vector2(215, 150), new Vector2(40, 25), "Exit", EngineResources.Fonts["GamerFont"]),
+            new (new Vector2(0, 150), new Vector2(275, 35), "", EngineResources.Fonts["GamerFont"])
             {
                 RenderOrder = -1
             }
         ];
 
-        Menu _mainMenu = new Menu(components, _renderScale, scene.Camera);
-        _mainMenu.SetSounds(_sfx["ding"], _sfx["accept"], _sfx["deny"]);
+        Menu _mainMenu = new Menu(components, scene.Camera);
+        _mainMenu.SetSounds(EngineResources.Sfx["ding"], EngineResources.Sfx["accept"], EngineResources.Sfx["deny"]);
         
         _menus["main"] = _mainMenu;
         scene.Add(_menus["main"]);
@@ -448,13 +427,13 @@ public class MainGame : Game
         // OPTIONS MENU
         components =
         [
-            new (new Vector2(-150, -160), new Vector2(100, 25), _renderScale, "SFX Volume", _fonts["GamerFont"]),
-            new (new Vector2(-170, 150), new Vector2(80, 25), _renderScale, "Back", _fonts["GamerFont"]),
-            new (new Vector2(50, -160), new Vector2(40, 25), _renderScale, Math.Round(SoundEffect.MasterVolume*100)+"%", _fonts["GamerFont"])
+            new (new Vector2(-150, -160), new Vector2(100, 25), "SFX Volume", EngineResources.Fonts["GamerFont"]),
+            new (new Vector2(-170, 150), new Vector2(80, 25), "Back", EngineResources.Fonts["GamerFont"]),
+            new (new Vector2(50, -160), new Vector2(40, 25), Math.Round(SoundEffect.MasterVolume*100)+"%", EngineResources.Fonts["GamerFont"])
         ];
         
-        Menu _optionsMenu = new Menu(components, _renderScale, scene.Camera);
-        _optionsMenu.SetSounds(_sfx["ding"], _sfx["accept"], _sfx["deny"]);
+        Menu _optionsMenu = new Menu(components, scene.Camera);
+        _optionsMenu.SetSounds(EngineResources.Sfx["ding"], EngineResources.Sfx["accept"], EngineResources.Sfx["deny"]);
         
         _menus["options"] = _optionsMenu;
         scene.Add(_menus["options"]);
@@ -463,26 +442,26 @@ public class MainGame : Game
         
         // Menu Actions
         // MAIN MENU
-        _menus["main"].Components[0].LinkedAction = new CommandSceneManagerChangeScene(_sceneManager,"game");
-        _menus["main"].Components[2].LinkedAction = new CommandMenuSwapTo(_menus["main"],_menus["options"],0);
-        _menus["main"].Components[3].LinkedAction = new CommandGameExit(this);
+        _menus["main"].Components[0].LinkedAction = new CommandSceneManagerChangeScene("game");
+        _menus["main"].Components[2].LinkedAction = new CommandMenuSwapTo(_menus["main"].Id,_menus["options"].Id,0);
+        _menus["main"].Components[3].LinkedAction = new CommandGameExit();
         
         // OPTIONS MENU
-        _menus["options"].Components[0].LinkedAction = new CommandMenuEngage(_menus["options"],2);
-        _menus["options"].Components[1].LinkedAction = new CommandMenuSwapTo(_menus["options"],_menus["main"]);
-        _menus["options"].Components[2].LinkedAction = new CommandMenuEngage(_menus["options"],0);
+        _menus["options"].Components[0].LinkedAction = new CommandMenuEngage(_menus["options"].Id,2);
+        _menus["options"].Components[1].LinkedAction = new CommandMenuSwapTo(_menus["options"].Id,_menus["main"].Id);
+        _menus["options"].Components[2].LinkedAction = new CommandMenuEngage(_menus["options"].Id,0);
         _menus["options"].Components[2].DirectionalActions = new()
         {
             {
                 MenuComponent.NavDirections.Up,
-                new CommandSoundEffectMasterVolumeChange(0.05f,_menus["options"].Components[2].Text,_sfx["accept"])
+                new CommandSoundEffectMasterVolumeChange(0.05f,_menus["options"].Components[2].TextDisplay.Id,EngineResources.Sfx["accept"])
             },
             {
                 MenuComponent.NavDirections.Down,
-                new CommandSoundEffectMasterVolumeChange(-0.05f,_menus["options"].Components[2].Text,_sfx["deny"])
+                new CommandSoundEffectMasterVolumeChange(-0.05f,_menus["options"].Components[2].TextDisplay.Id,EngineResources.Sfx["deny"])
             }
         };
         
-        scene.StartAction = new CommandMenuOpen(_menus["main"],0);
+        scene.StartAction = new CommandMenuOpen(_menus["main"].Id,0);
     }
 }

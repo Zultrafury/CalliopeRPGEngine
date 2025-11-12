@@ -24,7 +24,7 @@ public class MenuComponent : IGameObject
     public Vector2 Size { get; set; }
     public Texture2D Border { get; set; }
     public Texture2D Background { get; set; }
-    public TextDisplay Text { get; set; }
+    public TextDisplay TextDisplay { get; set; }
     [JsonIgnore]
     public float RenderScale { get; set; }
     public float RenderOrder { get; set; }
@@ -32,12 +32,11 @@ public class MenuComponent : IGameObject
     public ICommand LinkedAction { get; set; }
     public Dictionary<NavDirections, ICommand> DirectionalActions { get; set; } = null;
 
-    public MenuComponent(Vector2 offset, Vector2 size, float renderScale, string text, SpriteFont font, Texture2D border = null, Texture2D background = null)
+    public MenuComponent(Vector2 offset, Vector2 size, string text, SpriteFontResource font, Texture2D border = null, Texture2D background = null)
     {
-        RenderScale = renderScale;
-        Offset = offset*RenderScale;
+        Offset = offset;
         Size = size;
-        Text = new TextDisplay(font,Position*RenderScale,RenderScale,text)
+        TextDisplay = new TextDisplay(font,Position,text)
         {
             Color = Color.White,
             Centered = true
@@ -52,12 +51,13 @@ public class MenuComponent : IGameObject
     public void SceneInit(Scene scene)
     {
         Scene = scene;
+        RenderScale = float.Parse(Scene.Config["renderscale"]);
     }
 
     public void Update(GameTime gameTime)
     {
-        if (Text.Centered) Text.Position = (Position+(Offset/2));
-        else Text.Position = (Position+(Offset/2))-(new Vector2(Size.X,0)/2)*RenderScale+new Vector2(5f,0)*RenderScale;
+        if (TextDisplay.Centered) TextDisplay.Position = (Position+(Offset*RenderScale/2));
+        else TextDisplay.Position = (Position+(Offset/2))-(new Vector2(Size.X,0)/2)*RenderScale+new Vector2(5f,0)*RenderScale;
     }
 
     public MenuComponent Navigate(NavDirections direction)
@@ -65,7 +65,7 @@ public class MenuComponent : IGameObject
         if (DirectionalActions != null && DirectionalActions.TryGetValue(direction, out ICommand value)) value?.Execute();
         if (!Neighbors.TryGetValue(direction, out var i)) return null;
 
-        var neighbor = (MenuComponent)Scene.Get(i,false);
+        var neighbor = Scene.Get(i,false).ToMenuComponent();
         Selected = false;
         neighbor.Selected = true;
         return neighbor;
@@ -92,20 +92,22 @@ public class MenuComponent : IGameObject
 
     public void Draw(SpriteBatch spriteBatch, GameTime gameTime)
     {
+        var position  = Position;
+        var rect = new RectangleF((position + (Offset*RenderScale / 2)) - ((Size / 2) * RenderScale), Size * RenderScale);
         if (Background == null)
         {
-            spriteBatch.FillRectangle(new RectangleF((Position+(Offset/2))-(Size/2)*RenderScale,Size*RenderScale), Color.Black);
+            spriteBatch.FillRectangle(rect, Color.Black);
         }
         if (Border == null)
         {
             Color col = Selected ? Color.Red : Color.LightGray;
-            spriteBatch.DrawRectangle(new RectangleF((Position+(Offset/2))-(Size/2)*RenderScale,Size*RenderScale), col, 2*RenderScale);
+            spriteBatch.DrawRectangle(rect, col, 2*RenderScale);
         }
-        Text.Draw(spriteBatch, gameTime);
+        TextDisplay.Draw(spriteBatch, gameTime);
     }
 }
 
-[Obsolete("MenuComponents do not need a custom converter now",true)]
+/*[Obsolete("MenuComponents do not need a custom converter now",true)]
 public class MenuComponentConverter : JsonConverter
 {
     private readonly HashSet<MenuComponent.NavDirections> _keysToInclude =
@@ -144,4 +146,4 @@ public class MenuComponentConverter : JsonConverter
                objectType.GetGenericTypeDefinition() == typeof(Dictionary<,>) &&
                objectType.GetGenericArguments() == (Type[])[typeof(MenuComponent.NavDirections),typeof(MenuComponent)];
     }
-}
+}*/

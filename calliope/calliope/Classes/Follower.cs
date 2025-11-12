@@ -14,22 +14,22 @@ public class Follower : AnimatedSprite, IGameObject
     private Queue<Player.MoveDirections> oldDirs = new();
     private bool ignore;
     private Vector2 oldPos;
-    
-    public Follower(Texture2D spriteTexture, Vector2 position, int spriteWidth, int spriteHeight, int frameRate, int? order = null, float followingDistance = 1) :
+    [JsonConstructor]
+    public Follower(TextureResource spriteTexture, Vector2 position, int spriteWidth, int spriteHeight, int frameRate, int? order = null, float followingDistance = 1) :
         base(spriteTexture, position, spriteWidth, spriteHeight, frameRate)
     {
         oldPos = Position;
         Order = order;
         FollowingDistance = followingDistance;
     }
-    [JsonConstructor]
-    public Follower(Texture2D spriteTexture, Vector2 position, Vector2 dimensions, int frameRate, int? order = null,  float followingDistance = 1) :
-        this(spriteTexture, position, (int)dimensions.X, (int)dimensions.Y, frameRate, order, followingDistance) {}
+    
+    public Follower(TextureResource spriteTexture, Vector2 position, Point dimensions, int frameRate, int? order = null,  float followingDistance = 1) :
+        this(spriteTexture, position, dimensions.X, dimensions.Y, frameRate, order, followingDistance) {}
 
     public new void SceneInit(Scene scene)
     {
-        base.SceneInit(Scene);
-        InitializeFollowing();
+        base.SceneInit(scene);
+        InitializeFollowing(Scene.Get(Scene.Player).ToPlayer());
     }
 
     public new void Update(GameTime gameTime)
@@ -49,15 +49,18 @@ public class Follower : AnimatedSprite, IGameObject
         base.Draw(spriteBatch, gameTime);
     }
 
-    public void InitializeFollowing()
+    public void InitializeFollowing(Player player)
     {
-        Player player = Scene.Get(Scene.Player).ToPlayer();
-        Order ??= player.Followers.Count;
-        
+        if (Order == null)
+        {
+            for (int i = 0; i < player.Followers.Count; i++)
+            {
+                if (player.Followers[i] == this) Order = i + 1;
+            }
+        }
 
         for (int i = 0; i < 3; i++) oldDirs.Enqueue(player.Facing);
-        for (int i = 0; i < (Order + 1) * SpriteWidth * FollowingDistance; i++) Positions.Enqueue((player.Facing,Position,player.FrameRate));
-        Console.WriteLine(oldDirs.Count);
+        for (int i = 0; i < Order * SpriteWidth * FollowingDistance; i++) Positions.Enqueue((player.Facing,Position,player.FrameRate));
     }
 
     public void RecordPosition(Player.MoveDirections direction, Vector2 position, int frameRate)

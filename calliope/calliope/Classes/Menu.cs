@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
@@ -20,8 +21,7 @@ public class Menu : IGameObject
     public OrthographicCamera Camera { get; set; }
     public Vector2 Position { get; set; }
     public bool Active { get; set; }
-    [JsonIgnore]
-    public Dictionary<string, SoundEffect> Sounds { get; set; } = new()
+    public Dictionary<string, SoundEffectResource> Sounds { get; set; } = new()
     {
         { "navigate", null },
         { "select",  null },
@@ -30,10 +30,9 @@ public class Menu : IGameObject
     
     private MenuComponent currentComponent;
     private KeyboardState keyboard = Keyboard.GetState();
-    public Menu(List<MenuComponent> components, float renderScale, OrthographicCamera camera = null)
+    public Menu(List<MenuComponent> components, OrthographicCamera camera = null)
     {
         Components = components;
-        RenderScale = renderScale;
         Camera = camera;
         currentComponent = Components[0];
         currentComponent.Selected = true;
@@ -45,6 +44,8 @@ public class Menu : IGameObject
     public void SceneInit(Scene scene)
     {
         Scene = scene;
+        Camera = Scene.Camera;
+        RenderScale = float.Parse(Scene.Config["renderscale"]);
     }
 
     public void Update(GameTime gameTime)
@@ -96,7 +97,7 @@ public class Menu : IGameObject
         //spriteBatch.DrawCircle(Position,5*RenderScale,16,Color.Green,1*RenderScale);
     }
 
-    public void SetSounds(SoundEffect navigate, SoundEffect select, SoundEffect back)
+    public void SetSounds(SoundEffectResource navigate, SoundEffectResource select, SoundEffectResource back)
     {
         Sounds["navigate"] = navigate;
         Sounds["select"] = select;
@@ -105,7 +106,7 @@ public class Menu : IGameObject
 
     void Select()
     {
-        Sounds["select"].Play();
+        Sounds["select"].SoundEffect.Play();
         currentComponent.LinkedAction?.Execute();
     }
     
@@ -115,7 +116,7 @@ public class Menu : IGameObject
 
         if (nextcomponent != null)
         {
-            Sounds["navigate"].Play();
+            Sounds["navigate"].SoundEffect.Play();
             currentComponent = nextcomponent;
         }
         //else Sounds["back"].Play();

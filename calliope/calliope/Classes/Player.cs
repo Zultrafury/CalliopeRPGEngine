@@ -24,9 +24,7 @@ public class Player : AnimatedSprite, IGameObject
             runSpeed = Speed * 2;
         }
     }
-    [JsonIgnore]
     public bool Interacting { get; set; }
-    [JsonIgnore]
     public bool InteractPressed { get; set; }
     [JsonIgnore]
     public OrthographicCamera Camera { get; set; }
@@ -50,23 +48,30 @@ public class Player : AnimatedSprite, IGameObject
     public bool DrawDebugRects { get; set; } = false;
 
     public List<Follower> Followers { get; set; } = new();
-    public Menu StatusMenu { get; set; }
-    public Menu CurrentMenu { get; set; }
+    public uint StatusMenu { get; set; }
+    public uint? CurrentMenu { get; set; }
 
     private bool statusMenuChange;
     private float runSpeed;
     private float currentSpeed;
-    
-    public Player(Texture2D spriteTexture, Vector2 position, int spriteWidth, int spriteHeight, int frameRate) : 
+    [JsonConstructor]
+    public Player(TextureResource spriteTexture, Vector2 position, int spriteWidth, int spriteHeight, int frameRate) : 
         base(spriteTexture, position,spriteWidth,spriteHeight, frameRate)
     {
         runSpeed = Speed * 2;
         UpdateOrder = -100f;
     }
     
-    [JsonConstructor]
-    public Player(Texture2D spriteTexture, Vector2 position, Vector2 dimensions, int  frameRate) : 
+    public Player(TextureResource spriteTexture, Vector2 position, Point dimensions, int  frameRate) : 
         this(spriteTexture, position, (int)dimensions.X, (int)dimensions.Y, frameRate) {}
+
+    public new void SceneInit(Scene scene)
+    {
+        base.SceneInit(scene);
+        Config = Scene.Config;
+        Camera = Scene.Camera;
+        foreach (Follower follower in Followers) follower.RenderScale = RenderScale;
+    }
 
     public new void Update(GameTime gameTime)
     {
@@ -79,13 +84,13 @@ public class Player : AnimatedSprite, IGameObject
             {
                 if (CurrentMenu == null)
                 {
-                    StatusMenu.Sounds["select"].Play();
+                    Scene.Get(StatusMenu,false).ToMenu().Sounds["select"].SoundEffect.Play();
                     AnimIndex = AnimRange.X;
                     SwapMenu(StatusMenu,0);
                 }
                 else
                 {
-                    StatusMenu.Sounds["back"].Play();
+                    Scene.Get(StatusMenu,false).ToMenu().Sounds["back"].SoundEffect.Play();
                     SwapMenu(null);
                 }
             }
@@ -153,10 +158,10 @@ public class Player : AnimatedSprite, IGameObject
         CalculateCollisionArea();
 
         // Center Camera
-        Camera.Position = Position - RenderScale * 
+        Camera.Position = (Position * RenderScale) - RenderScale * 
             new Vector2((float.Parse(Config["screenwidth"]) / 2), (float.Parse(Config["screenheight"]) / 2));
         
-        StatusMenu.Update(gameTime);
+        Scene.Get(StatusMenu,false).ToMenu().Update(gameTime);
 
         List<AnimatedSprite> orderList =
         [
@@ -187,11 +192,11 @@ public class Player : AnimatedSprite, IGameObject
         spriteBatch.DrawRectangle(InteractArea,Color.Blue,5);
     }
 
-    public void SwapMenu(Menu menu, int? reselectIndex = null)
+    public void SwapMenu(uint? menuId, int? reselectIndex = null)
     {
-        CurrentMenu?.Close();
-        CurrentMenu = menu;
-        CurrentMenu?.Open(reselectIndex);
+        if (CurrentMenu != null) Scene.Get(CurrentMenu.Value,false).ToMenu().Close();
+        CurrentMenu = menuId;
+        if (CurrentMenu != null) Scene.Get(CurrentMenu.Value,false).ToMenu().Open(reselectIndex);
     }
 
     public void Move(MoveDirections direction, GameTime gameTime, float modifier = 1f, MoveDirections? faceOverride = null)
@@ -202,7 +207,7 @@ public class Player : AnimatedSprite, IGameObject
         
         DragFollowers();
 
-        float moveAmount = currentSpeed * gameTime.ElapsedGameTime.Milliseconds * modifier * RenderScale;
+        float moveAmount = currentSpeed * gameTime.ElapsedGameTime.Milliseconds * modifier;
         
         switch (direction)
         {
@@ -231,22 +236,22 @@ public class Player : AnimatedSprite, IGameObject
             case MoveDirections.Up:
                 AnimRange = AnimSets["walk_up"];
                 Facing = MoveDirections.Up;
-                pos = new Vector2(Position.X - size.Width/2, Position.Y-size.Height);
+                pos = new Vector2(Position.X*RenderScale - size.Width/2, Position.Y*RenderScale-size.Height);
                 break;
             case MoveDirections.Down:
                 AnimRange = AnimSets["walk_down"];
                 Facing = MoveDirections.Down;
-                pos = new Vector2(Position.X - size.Width/2, Position.Y);
+                pos = new Vector2(Position.X*RenderScale - size.Width/2, Position.Y*RenderScale);
                 break;
             case MoveDirections.Left:
                 AnimRange = AnimSets["walk_left"];
                 Facing = MoveDirections.Left;
-                pos = new Vector2(Position.X-size.Width, Position.Y - size.Height/2);
+                pos = new Vector2(Position.X*RenderScale-size.Width, Position.Y*RenderScale - size.Height/2);
                 break;
             case MoveDirections.Right:
                 AnimRange = AnimSets["walk_right"];
                 Facing = MoveDirections.Right;
-                pos = new Vector2(Position.X, Position.Y - size.Height/2);
+                pos = new Vector2(Position.X*RenderScale, Position.Y*RenderScale - size.Height/2);
                 break;
         }
 
@@ -260,7 +265,7 @@ public class Player : AnimatedSprite, IGameObject
         DragFollowers(false);
         
         // Center Camera
-        Camera.Position = Position - RenderScale * 
+        Camera.Position = (Position * RenderScale) - RenderScale * 
             new Vector2((float.Parse(Config["screenwidth"]) / 2), (float.Parse(Config["screenheight"]) / 2));
         
         //Reset Animation
@@ -269,8 +274,8 @@ public class Player : AnimatedSprite, IGameObject
 
     void CalculateCollisionArea()
     {
-        Point pSize = (new Vector2(SpriteDimensions.X,SpriteDimensions.Y) * RenderScale).ToPoint();
-        CollisionArea = new Rectangle(Position.ToPoint()-(pSize/new Point(2,2)), pSize);
+        Vector2 pSize = new Vector2(SpriteDimensions.X,SpriteDimensions.Y) * RenderScale;
+        CollisionArea = new RectangleF((Position*RenderScale)-(pSize/new Vector2(2,2)), pSize);
     }
 
     void DragFollowers(bool forward = true)

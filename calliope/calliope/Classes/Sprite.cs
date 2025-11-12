@@ -13,16 +13,14 @@ public class Sprite : IGameObject
     public int Costume { get; set; }
     [JsonIgnore]
     public Point CurrentCostume { get; set; }
-    [JsonIgnore]
-    public Texture2D SpriteTexture { get; set;}
-    [JsonIgnore]
+    public TextureResource SpriteTexture { get; set;}
     public int SpriteWidth { get; set; } = 16;
-    [JsonIgnore]
     public int SpriteHeight { get; set; } = 16;
 
     /// <summary>
     /// A property for getting/setting both SpriteWidth and SpriteHeight in a single Vector2.
     /// </summary>
+    [JsonIgnore]
     public Point SpriteDimensions
     {
         get => new(SpriteWidth, SpriteHeight);
@@ -47,7 +45,8 @@ public class Sprite : IGameObject
     /// <param name="spriteWidth">The width of the sprite.</param>
     /// <param name="spriteHeight">The height of the sprite.</param>
     /// <param name="costume"></param>
-    public Sprite(Texture2D spriteTexture, Vector2 position, int spriteWidth, int spriteHeight, int costume = 0)
+    [JsonConstructor]
+    public Sprite(TextureResource spriteTexture, Vector2 position, int spriteWidth, int spriteHeight, int costume = 0)
     {
         SpriteTexture = spriteTexture;
         Position = position;
@@ -56,7 +55,7 @@ public class Sprite : IGameObject
         if (SpriteTexture == null) return;
         
         Costume = costume;
-        int costumeSetWidth = spriteTexture.Width/spriteWidth;
+        int costumeSetWidth = spriteTexture.Texture.Width/spriteWidth;
         CurrentCostume = new ((Costume%costumeSetWidth)*SpriteWidth, (Costume/costumeSetWidth)*SpriteHeight);
     }
 
@@ -64,12 +63,13 @@ public class Sprite : IGameObject
     /// <param name="position"></param>
     /// <param name="dimensions">The dimensions of the sprite. (X + Y reduced to ints)</param>
     /// <param name="costume"></param>
-    public Sprite(Texture2D spriteTexture, Vector2 position, Vector2 dimensions, int costume = 0) :
+    public Sprite(TextureResource spriteTexture, Vector2 position, Point dimensions, int costume = 0) :
         this(spriteTexture, position, (int)dimensions.X, (int)dimensions.Y, costume) {}
 
     public void SceneInit(Scene scene)
     {
         Scene = scene;
+        RenderScale = float.Parse(Scene.Config["renderscale"]);
     }
 
     /// <summary>
@@ -89,9 +89,8 @@ public class Sprite : IGameObject
     {
         if (SpriteTexture == null) return;
         
-        
-        
-        spriteBatch.Draw(SpriteTexture, new Rectangle((int)Position.X-(int)(SpriteWidth*RenderScale)/2,(int)Position.Y-(int)(SpriteHeight*RenderScale)/2,
+        var position = Position * RenderScale;
+        spriteBatch.Draw(SpriteTexture.Texture, new Rectangle((int)position.X-(int)(SpriteWidth*RenderScale)/2,(int)position.Y-(int)(SpriteHeight*RenderScale)/2,
                 (int)(SpriteWidth*RenderScale),(int)(SpriteHeight*RenderScale)),
             new Rectangle(CurrentCostume,SpriteDimensions), Color.White);
     }
