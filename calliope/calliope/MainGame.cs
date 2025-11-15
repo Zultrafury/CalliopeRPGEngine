@@ -93,7 +93,8 @@ public class MainGame : Game
         EngineResources.LoadAsset("Assets/Sounds/accept");
         EngineResources.LoadAsset("Assets/Sounds/deny");
         
-        ICommand.SceneManager.Path = "jsontext.json";
+        ICommand.SceneManager.Path = _config["scenesfile"];
+        
         if (false)
         {
             // -- MAIN MENU SCENE --
@@ -135,8 +136,7 @@ public class MainGame : Game
             Console.WriteLine($"Content successfully read from {ICommand.SceneManager.Path}");
         }
 
-        _sceneManager.ChangeScene("mainmenu");
-        Console.WriteLine(_sceneManager.CurrentScene);
+        _sceneManager.ChangeScene(_config["startupscene"]);
     }
 
     protected override void Update(GameTime gameTime)

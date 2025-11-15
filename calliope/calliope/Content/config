@@ -4,3 +4,5 @@ renderscale=10
 framerate=60
 sfxvolume=0.4
 musvolume=0.5
+startupscene=mainmenu
+scenesfile=jsontext.json
