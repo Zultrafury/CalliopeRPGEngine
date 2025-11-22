@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<SourceFileCollection xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Profile>Reach</Profile>
+  <Platform>DesktopGL</Platform>
+  <Config />
+  <SourceFiles>
+    <File>E:/Coding/Neumont/Capstone/CalliopeRPGEngine/calliope/leveleditor/Content/../../calliope/Content/Assets/Fonts/ArialFont.spritefont</File>
+    <File>E:/Coding/Neumont/Capstone/CalliopeRPGEngine/calliope/leveleditor/Content/../../calliope/Content/Assets/Fonts/GamerFont.spritefont</File>
+    <File>E:/Coding/Neumont/Capstone/CalliopeRPGEngine/calliope/leveleditor/Content/../../calliope/Content/Assets/Images/basechar.png</File>
+    <File>E:/Coding/Neumont/Capstone/CalliopeRPGEngine/calliope/leveleditor/Content/../../calliope/Content/Assets/Images/basetiles.png</File>
+    <File>E:/Coding/Neumont/Capstone/CalliopeRPGEngine/calliope/leveleditor/Content/../../calliope/Content/Assets/Sounds/accept.wav</File>
+    <File>E:/Coding/Neumont/Capstone/CalliopeRPGEngine/calliope/leveleditor/Content/../../calliope/Content/Assets/Sounds/deny.wav</File>
+    <File>E:/Coding/Neumont/Capstone/CalliopeRPGEngine/calliope/leveleditor/Content/../../calliope/Content/Assets/Sounds/ding.wav</File>
+  </SourceFiles>
+  <DestFiles>
+    <File>Fonts/ArialFont.spritefont</File>
+    <File>Fonts/GamerFont.spritefont</File>
+    <File>Images/basechar.png</File>
+    <File>Images/basetiles.png</File>
+    <File>Sounds/accept.wav</File>
+    <File>Sounds/deny.wav</File>
+    <File>Sounds/ding.wav</File>
+  </DestFiles>
+</SourceFileCollection>

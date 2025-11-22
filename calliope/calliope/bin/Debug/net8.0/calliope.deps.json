@@ -9,7 +9,7 @@
       "calliope/1.0.0": {
         "dependencies": {
           "MonoGame.Content.Builder.Task": "3.8.4.1",
-          "MonoGame.Extended": "5.1.0",
+          "MonoGame.Extended": "5.3.0",
           "MonoGame.Framework.DesktopGL": "3.8.4.1",
           "MonoGame.Library.OpenAL": "1.24.3.2",
           "MonoGame.Library.SDL": "2.32.10.1",
@@ -21,11 +21,11 @@
         }
       },
       "MonoGame.Content.Builder.Task/3.8.4.1": {},
-      "MonoGame.Extended/5.1.0": {
+      "MonoGame.Extended/5.3.0": {
         "runtime": {
           "lib/net8.0/MonoGame.Extended.dll": {
-            "assemblyVersion": "5.1.0.0",
-            "fileVersion": "5.1.0.0"
+            "assemblyVersion": "5.3.0.0",
+            "fileVersion": "5.3.0.0"
           }
         }
       },
@@ -162,12 +162,12 @@
       "path": "monogame.content.builder.task/3.8.4.1",
       "hashPath": "monogame.content.builder.task.3.8.4.1.nupkg.sha512"
     },
-    "MonoGame.Extended/5.1.0": {
+    "MonoGame.Extended/5.3.0": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-SKFNdTUYE/0hjfuCxQoFbsmyb2GDJmVXXtoKjov23PBySvWMGVTikMKpWDlCu63bhq/fcUMYS69u+SpZOfLv8Q==",
-      "path": "monogame.extended/5.1.0",
-      "hashPath": "monogame.extended.5.1.0.nupkg.sha512"
+      "sha512": "sha512-QHZBcS1ZpnDkt0hj6X0JJF+rxk/GzQM9Vr4KizsMZQ4406pxkeUL4MGFOGtjpjvy7ob+p2vcz7EXNN5IcdlOgw==",
+      "path": "monogame.extended/5.3.0",
+      "hashPath": "monogame.extended.5.3.0.nupkg.sha512"
     },
     "MonoGame.Framework.DesktopGL/3.8.4.1": {
       "type": "package",

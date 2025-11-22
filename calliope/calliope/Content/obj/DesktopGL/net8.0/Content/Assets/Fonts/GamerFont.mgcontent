@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PipelineBuildEvent xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <SourceFile>E:/Coding/Neumont/Capstone/CalliopeRPGEngine/calliope/calliope/Content/Assets/Fonts/GamerFont.spritefont</SourceFile>
-  <SourceTime>2025-11-12T02:27:11.2055508-07:00</SourceTime>
+  <SourceTime>2025-11-12T02:28:10.8508569-07:00</SourceTime>
   <DestFile>E:/Coding/Neumont/Capstone/CalliopeRPGEngine/calliope/calliope/Content/bin/DesktopGL/Content/Assets/Fonts/GamerFont.xnb</DestFile>
-  <DestTime>2025-11-12T02:27:46.83343-07:00</DestTime>
+  <DestTime>2025-11-18T06:03:03.8943447-07:00</DestTime>
   <Importer>FontDescriptionImporter</Importer>
   <ImporterTime>2025-06-02T04:31:02-06:00</ImporterTime>
   <Processor>FontDescriptionProcessor</Processor>

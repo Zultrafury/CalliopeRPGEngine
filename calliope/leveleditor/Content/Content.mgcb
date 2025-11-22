@@ -1,0 +1,71 @@
+
+#----------------------------- Global Properties ----------------------------#
+
+/outputDir:bin/$(Platform)
+/intermediateDir:obj/$(Platform)
+/platform:DesktopGL
+/config:
+/profile:Reach
+/compress:False
+
+#-------------------------------- References --------------------------------#
+
+
+#---------------------------------- Content ---------------------------------#
+
+#begin ../../calliope/Content/Assets/Fonts/ArialFont.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Compressed
+/build:../../calliope/Content/Assets/Fonts/ArialFont.spritefont;Fonts/ArialFont.spritefont
+
+#begin ../../calliope/Content/Assets/Fonts/GamerFont.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Compressed
+/build:../../calliope/Content/Assets/Fonts/GamerFont.spritefont;Fonts/GamerFont.spritefont
+
+#begin ../../calliope/Content/Assets/Images/basechar.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:../../calliope/Content/Assets/Images/basechar.png;Images/basechar.png
+
+#begin ../../calliope/Content/Assets/Images/basetiles.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:../../calliope/Content/Assets/Images/basetiles.png;Images/basetiles.png
+
+#begin ../../calliope/Content/Assets/Sounds/accept.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:../../calliope/Content/Assets/Sounds/accept.wav;Sounds/accept.wav
+
+#begin ../../calliope/Content/Assets/Sounds/deny.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:../../calliope/Content/Assets/Sounds/deny.wav;Sounds/deny.wav
+
+#begin ../../calliope/Content/Assets/Sounds/ding.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:../../calliope/Content/Assets/Sounds/ding.wav;Sounds/ding.wav
+

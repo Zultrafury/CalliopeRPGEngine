@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PipelineBuildEvent xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <SourceFile>E:/Coding/Neumont/Capstone/CalliopeRPGEngine/calliope/leveleditor/Content/../../calliope/Content/Assets/Fonts/GamerFont.spritefont</SourceFile>
+  <SourceTime>2025-11-12T02:28:10.8508569-07:00</SourceTime>
+  <DestFile>E:/Coding/Neumont/Capstone/CalliopeRPGEngine/calliope/leveleditor/Content/bin/DesktopGL/Content/Fonts/GamerFont.xnb</DestFile>
+  <DestTime>2025-11-20T20:03:59.4639045-07:00</DestTime>
+  <Importer>FontDescriptionImporter</Importer>
+  <ImporterTime>2024-08-16T11:05:56-06:00</ImporterTime>
+  <Processor>FontDescriptionProcessor</Processor>
+  <ProcessorTime>2024-08-16T11:05:56-06:00</ProcessorTime>
+  <Parameters>
+    <Key>PremultiplyAlpha</Key>
+    <Value>True</Value>
+  </Parameters>
+  <Parameters>
+    <Key>TextureFormat</Key>
+    <Value>Compressed</Value>
+  </Parameters>
+  <Dependencies />
+  <BuildAsset />
+  <BuildOutput />
+</PipelineBuildEvent>

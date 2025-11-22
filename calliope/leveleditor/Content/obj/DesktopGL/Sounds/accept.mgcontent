@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PipelineBuildEvent xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <SourceFile>E:/Coding/Neumont/Capstone/CalliopeRPGEngine/calliope/leveleditor/Content/../../calliope/Content/Assets/Sounds/accept.wav</SourceFile>
+  <SourceTime>2025-10-18T22:41:07.1660926-06:00</SourceTime>
+  <DestFile>E:/Coding/Neumont/Capstone/CalliopeRPGEngine/calliope/leveleditor/Content/bin/DesktopGL/Sounds/accept.xnb</DestFile>
+  <DestTime>2025-11-20T19:57:53.7457646-07:00</DestTime>
+  <Importer>WavImporter</Importer>
+  <ImporterTime>2024-08-16T11:05:56-06:00</ImporterTime>
+  <Processor>SoundEffectProcessor</Processor>
+  <ProcessorTime>2024-08-16T11:05:56-06:00</ProcessorTime>
+  <Parameters>
+    <Key>Quality</Key>
+    <Value>Best</Value>
+  </Parameters>
+  <Dependencies />
+  <BuildAsset />
+  <BuildOutput />
+</PipelineBuildEvent>
