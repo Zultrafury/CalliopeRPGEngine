@@ -1,10 +1,11 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Newtonsoft.Json;
 
 namespace calliope.Classes;
 
-public class Sprite : IGameObject
+public class Sprite : IGameObject, ICloneable
 {
     public Vector2 Position { get; set; }
     /// <summary>
@@ -64,7 +65,7 @@ public class Sprite : IGameObject
     /// <param name="dimensions">The dimensions of the sprite. (X + Y reduced to ints)</param>
     /// <param name="costume"></param>
     public Sprite(TextureResource spriteTexture, Vector2 position, Point dimensions, int costume = 0) :
-        this(spriteTexture, position, (int)dimensions.X, (int)dimensions.Y, costume) {}
+        this(spriteTexture, position, dimensions.X, dimensions.Y, costume) {}
 
     public void SceneInit(Scene scene)
     {
@@ -116,5 +117,10 @@ public class Sprite : IGameObject
         result.SetData(colors);
         
         return result;
+    }
+
+    public object Clone()
+    {
+        return MemberwiseClone();
     }
 }
