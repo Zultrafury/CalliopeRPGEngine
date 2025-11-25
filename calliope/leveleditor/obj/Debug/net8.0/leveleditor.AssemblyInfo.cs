@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("leveleditor")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+dd6c3e9f509ea3a95ced9fd2cae48d60423c8143")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+afe22aa1a899b4c4f1b6d32b699fe264318a21bf")]
 [assembly: System.Reflection.AssemblyProductAttribute("leveleditor")]
 [assembly: System.Reflection.AssemblyTitleAttribute("leveleditor")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

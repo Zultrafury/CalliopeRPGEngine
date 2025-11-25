@@ -171,10 +171,17 @@ public class LevelEditor : Game
             {
                 PlaceSprite((Sprite)_selectedGameObject);
             }
-            else if (Mouse.GetState().LeftButton == ButtonState.Pressed &&
-                     _previousMouseState.LeftButton == ButtonState.Released)
+            else if (Mouse.GetState().LeftButton == ButtonState.Pressed && _previousMouseState.LeftButton == ButtonState.Released)
             {
                 PlaceSprite((Sprite)_selectedGameObject);
+            }
+            else if (Keyboard.GetState().IsKeyDown(Keys.LeftControl) && Mouse.GetState().RightButton == ButtonState.Pressed)
+            {
+                RemoveSprite();
+            }
+            else if (Mouse.GetState().RightButton == ButtonState.Pressed && _previousMouseState.RightButton == ButtonState.Released)
+            {
+                RemoveSprite();
             }
         }
 
@@ -237,10 +244,15 @@ public class LevelEditor : Game
             _spriteBatch.DrawString(_font,text,new Vector2(leftside,_camera.BoundingRectangle.Top)-fontsize,Color.Black,
                 0,Vector2.Zero,new Vector2(standardsize),SpriteEffects.None,0);
             
+            // Type text
+            text = "Type: "+_selectedGameObject.GetType().Name;
+            fontsize = new Vector2(_font.MeasureString(text).X*standardsize/2,_font.MeasureString(text).Y*-standardsize);
+            _spriteBatch.DrawString(_font,text,new Vector2(leftside,_camera.BoundingRectangle.Top)-fontsize,Color.Black,
+                0,Vector2.Zero,new Vector2(standardsize),SpriteEffects.None,0);
+            
             // Selected object
             void DisplaySelectedGameObject()
             {
-                var scale = _selectedGameObject.RenderScale;
                 _selectedGameObject.RenderScale = 80/_renderscale;
                 switch (_selectedGameObject.GetType().Name)
                 {
@@ -255,13 +267,12 @@ public class LevelEditor : Game
                                                    *((_sidepanelfactor/2)-1),0))
                                                *sprite.SpriteWidth*(80/_renderscale))
                                               /(80/_renderscale*_zoom);*/
-                            Console.WriteLine(sprite.Position.ToNumerics()+" : "+_camera.BoundingRectangle.Center.ToNumerics());
+                            //Console.WriteLine(sprite.Position.ToNumerics()+" : "+_camera.BoundingRectangle.Center.ToNumerics());
                         }
                         break;
                     }
                 }
                 _selectedGameObject.Draw(_spriteBatch, gameTime);
-                _selectedGameObject.RenderScale = scale;
             }
             DisplaySelectedGameObject();
             
@@ -352,6 +363,7 @@ public class LevelEditor : Game
 
         Sprite newSprite = (Sprite)sprite.Clone();
         newSprite.Position = placementpos * newSprite.SpriteWidth;
+        ResizeGameObject(newSprite);
         _objects.Add(newSprite);
         
         /*foreach (var o in _objects)
@@ -361,6 +373,26 @@ public class LevelEditor : Game
                 Console.WriteLine(s.Position);
             }
         }*/
+    }
+
+    void RemoveSprite()
+    {
+        var placementpos = Vector2.Round(
+            (_camera.ScreenToWorld(Mouse.GetState().Position.ToVector2()))
+            / (_renderscale * _zoom));
+
+        foreach (var o in _objects)
+        {
+            if (o is Sprite s)
+            {
+                //Console.WriteLine(s.Position+", "+placementpos);
+                if (Vector2.Distance(s.Position / s.SpriteWidth, placementpos) < 0.5f)
+                {
+                    _objects.Remove(o);
+                    return;
+                }
+            }
+        }
     }
 
     bool MouseInBounds() => GraphicsDevice.Viewport.Bounds.Contains(Mouse.GetState().Position);
