@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Reflection;
 using calliope.Classes;
 using leveleditor.Classes;
 using Microsoft.Xna.Framework;
@@ -8,6 +10,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using MonoGame.Extended;
 using MonoGame.Extended.ViewportAdapters;
+using Newtonsoft.Json;
 
 namespace leveleditor;
 
@@ -250,6 +253,36 @@ public class LevelEditor : Game
             _spriteBatch.DrawString(_font,text,new Vector2(leftside,_camera.BoundingRectangle.Top)-fontsize,Color.Black,
                 0,Vector2.Zero,new Vector2(standardsize),SpriteEffects.None,0);
             
+            // Properties
+            string[] gameobjectproperties = ["Position","Id","RenderOrder","UpdateOrder"];
+            PropertyInfo[] properties = _selectedGameObject.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance);
+            text = "";
+            foreach (PropertyInfo property in properties)
+            {
+                if (gameobjectproperties.Contains(property.Name)) continue;
+                if (property.GetCustomAttribute<JsonIgnoreAttribute>() != null) continue;
+                // Is engine resource? Output path
+                if (property.PropertyType.IsSubclassOf(typeof(EngineResource)) && property.GetValue(_selectedGameObject) is EngineResource res)
+                {
+                    text += property.Name + ": " + res.Path + "\n";
+                }
+                // Otherwise output value
+                else text +=  property.Name+": "+property.GetValue(_selectedGameObject)+"\n";
+            }
+            
+            standardsize = 3/_renderscale;
+            fontsize = new Vector2(_font.MeasureString(text).X*standardsize/2,(fontsize.Y*4));
+            _spriteBatch.DrawString(_font,text,new Vector2(leftside,_camera.BoundingRectangle.Top)-fontsize,Color.Black,
+                0,Vector2.Zero,new Vector2(standardsize),SpriteEffects.None,0);
+            
+            // Coords text
+            standardsize = 5/_renderscale;
+            text = "Coords: "+(_camera.BoundingRectangle.Center.X/(_zoom*_renderscale)).ToString("F1")+","
+                   +(_camera.BoundingRectangle.Center.Y/(_zoom*_renderscale)).ToString("F1");
+            fontsize = new Vector2(_font.MeasureString(text).X*standardsize/2,_font.MeasureString(text).Y*standardsize);
+            _spriteBatch.DrawString(_font,text,new Vector2(leftside,_camera.BoundingRectangle.Bottom)-fontsize,Color.Black,
+                0,Vector2.Zero,new Vector2(standardsize),SpriteEffects.None,0);
+            
             // Selected object
             void DisplaySelectedGameObject()
             {
@@ -260,9 +293,11 @@ public class LevelEditor : Game
                     {
                         if (_selectedGameObject is Sprite sprite)
                         {
-                            sprite.Position = (_camera.BoundingRectangle.Center-new Vector2((_camera.BoundingRectangle.Width/_sidepanelfactor)
-                                                   *((_sidepanelfactor/2)-1),0))
-                                               /(80/_renderscale);
+                            Vector2 center = new (_camera.BoundingRectangle.Center.X,_camera.BoundingRectangle.Bottom-fontsize.Y
+                                -(sprite.SpriteHeight*(40/_renderscale)));
+                            sprite.Position = (center-new Vector2((_camera.BoundingRectangle.Width/_sidepanelfactor) 
+                                                *((_sidepanelfactor/2)-1),0)) 
+                                                /(80/_renderscale);
                             /*sprite.Position = ((_camera.BoundingRectangle.Center-new Vector2((_camera.BoundingRectangle.Width/_sidepanelfactor)
                                                    *((_sidepanelfactor/2)-1),0))
                                                *sprite.SpriteWidth*(80/_renderscale))
@@ -275,13 +310,6 @@ public class LevelEditor : Game
                 _selectedGameObject.Draw(_spriteBatch, gameTime);
             }
             DisplaySelectedGameObject();
-            
-            // Coords text
-            text = "Coords: "+(_camera.BoundingRectangle.Center.X/(_zoom*_renderscale)).ToString("F1")+","
-                   +(_camera.BoundingRectangle.Center.Y/(_zoom*_renderscale)).ToString("F1");
-            fontsize = new Vector2(_font.MeasureString(text).X*standardsize/2,_font.MeasureString(text).Y*standardsize);
-            _spriteBatch.DrawString(_font,text,new Vector2(leftside,_camera.BoundingRectangle.Bottom)-fontsize,Color.Black,
-                0,Vector2.Zero,new Vector2(standardsize),SpriteEffects.None,0);
         }
         DrawSidePanel();
 
