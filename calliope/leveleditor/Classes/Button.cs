@@ -7,7 +7,7 @@ namespace leveleditor.Classes;
 
 public class Button
 {
-    private RectangleF Bounds { get; set; } =  new(Vector2.Zero, SizeF.Empty);
+    public RectangleF Bounds { get; set; } =  new(Vector2.Zero, SizeF.Empty);
     public Vector2 Position
     {
         get => Bounds.Position;
@@ -23,9 +23,9 @@ public class Button
     public string Text { get; set; }
     public float TextSize { get; set; }
     public SpriteFont Font { get; set; }
-    public Color TextColor { get; set; } = new Color(255, 255, 255, 255);
-    public Color BackgroundColor { get; set; } = new Color(0, 0, 0, 255);
-    public Color ClickedColor { get; set; } = new Color(127, 127, 127, 255);
+    public Color TextColor { get; set; } = new (255, 255, 255, 255);
+    public Color BackgroundColor { get; set; } = new (0, 0, 0, 255);
+    public Color ClickedColor { get; set; } = new (127, 127, 127, 255);
     public bool Clicked { get; set; }
     public bool Enabled { get; set; } = false;
     public bool SnapToCamera { get; set; } = true;

@@ -8,10 +8,21 @@ namespace calliope.Classes;
 public class Sprite : IGameObject, ICloneable
 {
     public Vector2 Position { get; set; }
+
     /// <summary>
     /// The indexes between which frames are currently animated. X inclusive, Y exclusive.
     /// </summary>
-    public int Costume { get; set; }
+    private int _costume;
+    public int Costume
+    {
+        get => _costume;
+        set
+        {
+            _costume = value;
+            int costumeSetWidth = SpriteTexture.Texture.Width/SpriteWidth;
+            CurrentCostume = new ((_costume%costumeSetWidth)*SpriteWidth, (_costume/costumeSetWidth)*SpriteHeight);
+        }
+    }
     [JsonIgnore]
     public Point CurrentCostume { get; set; }
     public TextureResource SpriteTexture { get; set;}
@@ -56,8 +67,6 @@ public class Sprite : IGameObject, ICloneable
         if (SpriteTexture == null) return;
         
         Costume = costume;
-        int costumeSetWidth = spriteTexture.Texture.Width/spriteWidth;
-        CurrentCostume = new ((Costume%costumeSetWidth)*SpriteWidth, (Costume/costumeSetWidth)*SpriteHeight);
     }
 
     /// <param name="spriteTexture">The Texture2D that the sprite uses.</param>
