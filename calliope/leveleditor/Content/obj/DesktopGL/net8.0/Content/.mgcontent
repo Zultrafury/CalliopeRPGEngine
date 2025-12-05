@@ -13,12 +13,12 @@
     <File>E:/Coding/Neumont/Capstone/CalliopeRPGEngine/calliope/leveleditor/Content/../../calliope/Content/Assets/Sounds/ding.wav</File>
   </SourceFiles>
   <DestFiles>
-    <File>Fonts/ArialFont.spritefont</File>
-    <File>Fonts/GamerFont.spritefont</File>
-    <File>Images/basechar.png</File>
-    <File>Images/basetiles.png</File>
-    <File>Sounds/accept.wav</File>
-    <File>Sounds/deny.wav</File>
-    <File>Sounds/ding.wav</File>
+    <File>Assets/Fonts/ArialFont.spritefont</File>
+    <File>Assets/Fonts/GamerFont.spritefont</File>
+    <File>Assets/Images/basechar.png</File>
+    <File>Assets/Images/basetiles.png</File>
+    <File>Assets/Sounds/accept.wav</File>
+    <File>Assets/Sounds/deny.wav</File>
+    <File>Assets/Sounds/ding.wav</File>
   </DestFiles>
 </SourceFileCollection>

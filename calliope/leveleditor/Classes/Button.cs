@@ -7,17 +7,9 @@ namespace leveleditor.Classes;
 
 public class Button
 {
-    public RectangleF Bounds { get; set; } =  new(Vector2.Zero, SizeF.Empty);
-    public Vector2 Position
-    {
-        get => Bounds.Position;
-        set => Bounds = new RectangleF(value, Bounds.Size);
-    }
-    public SizeF Size
-    {
-        get => Bounds.Size;
-        set => Bounds = new RectangleF(Bounds.Position, value);
-    }
+    public Vector2 Position { get; set;  }
+    public SizeF Size { get; set; }
+    public RectangleF Bounds => new(Position, Size);
 
     public Vector2 Offset { get; set; }
     public string Text { get; set; }
@@ -27,8 +19,8 @@ public class Button
     public Color BackgroundColor { get; set; } = new (0, 0, 0, 255);
     public Color ClickedColor { get; set; } = new (127, 127, 127, 255);
     public bool Clicked { get; set; }
-    public bool Enabled { get; set; } = false;
-    public bool SnapToCamera { get; set; } = true;
+    public bool Enabled { get; set; } = true;
+    public bool SnapToCamera { get; set; }
     public float RenderScale { get; set; }
     public Action OnClick { get; set; }
 
@@ -45,12 +37,13 @@ public class Button
     {
         if (!Enabled) return;
         var standardsize = TextSize/RenderScale;
-        var fontsize = new Vector2(Font.MeasureString(Text).X*standardsize/2,Font.MeasureString(Text).Y*standardsize/2);
-        if (Size != SizeF.Empty) spriteBatch.FillRectangle(Position-Size/2, Size, BackgroundColor);
-        else spriteBatch.FillRectangle(Position-fontsize*1.25f, fontsize*2.5f, BackgroundColor);
+        var fontsize = Font.MeasureString(Text) * standardsize / 2;
+        Color color = Clicked ? ClickedColor : BackgroundColor;
+        spriteBatch.FillRectangle(Bounds, color);
         
-        spriteBatch.DrawString(Font,Text,Position-fontsize,TextColor,
+        spriteBatch.DrawString(Font,Text,Position+(fontsize/4),TextColor,
             0,Vector2.Zero,new Vector2(standardsize),SpriteEffects.None,0);
+        spriteBatch.DrawRectangle(Bounds,Color.Red);
     }
 
     public void Decorate(string text, float? textSize = null, SpriteFont font = null,
@@ -62,6 +55,19 @@ public class Button
         if (textColor != null) TextColor = textColor.Value;
         if (backgroundColor != null) BackgroundColor = backgroundColor.Value;
         if (clickedColor != null) ClickedColor = clickedColor.Value;
+        
+        if (Size == SizeF.Empty)
+        {
+            Resize();
+        }
+    }
+    
+    public void Resize(float? renderScale = null)
+    {
+        if (renderScale != null) RenderScale = renderScale.Value;
+        
+        var standardsize = TextSize / RenderScale;
+        Size = Font.MeasureString(Text) * standardsize / 2 * 2.5f;
     }
 
     public void Click()

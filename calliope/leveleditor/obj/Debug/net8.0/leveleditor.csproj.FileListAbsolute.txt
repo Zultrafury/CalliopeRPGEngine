@@ -43,3 +43,10 @@ E:\Coding\Neumont\Capstone\CalliopeRPGEngine\calliope\leveleditor\bin\Debug\net8
 E:\Coding\Neumont\Capstone\CalliopeRPGEngine\calliope\leveleditor\bin\Debug\net8.0\Content\Sounds\deny.xnb
 E:\Coding\Neumont\Capstone\CalliopeRPGEngine\calliope\leveleditor\bin\Debug\net8.0\Content\Sounds\ding.xnb
 E:\Coding\Neumont\Capstone\CalliopeRPGEngine\calliope\leveleditor\bin\Debug\net8.0\Content\settings
+E:\Coding\Neumont\Capstone\CalliopeRPGEngine\calliope\leveleditor\bin\Debug\net8.0\Content\Assets\Fonts\ArialFont.xnb
+E:\Coding\Neumont\Capstone\CalliopeRPGEngine\calliope\leveleditor\bin\Debug\net8.0\Content\Assets\Fonts\GamerFont.xnb
+E:\Coding\Neumont\Capstone\CalliopeRPGEngine\calliope\leveleditor\bin\Debug\net8.0\Content\Assets\Images\basechar.xnb
+E:\Coding\Neumont\Capstone\CalliopeRPGEngine\calliope\leveleditor\bin\Debug\net8.0\Content\Assets\Images\basetiles.xnb
+E:\Coding\Neumont\Capstone\CalliopeRPGEngine\calliope\leveleditor\bin\Debug\net8.0\Content\Assets\Sounds\accept.xnb
+E:\Coding\Neumont\Capstone\CalliopeRPGEngine\calliope\leveleditor\bin\Debug\net8.0\Content\Assets\Sounds\deny.xnb
+E:\Coding\Neumont\Capstone\CalliopeRPGEngine\calliope\leveleditor\bin\Debug\net8.0\Content\Assets\Sounds\ding.xnb

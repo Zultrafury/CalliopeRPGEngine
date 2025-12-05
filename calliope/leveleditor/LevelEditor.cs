@@ -32,9 +32,11 @@ public class LevelEditor : Game
     private float _sidepanelfactor = 8;
     private (float,string) _fadingnotif = (0,"");
     private List<IGameObject> _objects = new();
+    private List<IGameObject> _sampleObjects = new();
     private IGameObject _selectedGameObject;
     private Dictionary<PropertyInfo,TextEntryField> _propertyfields = new();
     private List<Button> _buttons = new();
+    private Dictionary<string,Button> _selectionbuttons = new();
     private List<TextEntryField> _textfields = new();
     private TextEntryField _currentfield = null;
 
@@ -83,17 +85,24 @@ public class LevelEditor : Game
     {
         _spriteBatch = new SpriteBatch(GraphicsDevice);
 
-        _font = Content.Load<SpriteFont>("Fonts/GamerFont");
-        var textureres = new TextureResource("Images/basetiles");
-        _selectedGameObject = new Sprite(textureres, Vector2.Zero, new Point(16),1)
-        {
-            RenderScale = _renderscale
-        };
-        //_objects.Add(_selectedGameObject);
+        EngineResources.LoadAsset("Assets/Fonts/GamerFont");
+        _font = EngineResources.Fonts["GamerFont"].Font;
+        EngineResources.LoadAsset("Assets/Images/basetiles");
+        EngineResources.LoadAsset("Assets/Images/basechar");
+        
+        _sampleObjects.Add(new Sprite(EngineResources.Textures["basetiles"], Vector2.Zero, new Point(16),1));
+        foreach (var o in _sampleObjects) o.RenderScale = _renderscale;
+        _selectedGameObject = _sampleObjects[0];
 
         var button = new Button(new (0, 0), _font, _renderscale);
-        button.Decorate("My button!");
+        button.Decorate(" < ",3);
         _buttons.Add(button);
+        _selectionbuttons["left"] = button;
+        
+        button = new Button(new (0, 0), _font, _renderscale);
+        button.Decorate(" > ",3);
+        _buttons.Add(button);
+        _selectionbuttons["right"] = button;
 
         /*string text = "My textfield!";
         var textfield = new TextEntryField(-(_font.MeasureString(text)/2)*(5/_renderscale), _font, _renderscale, true);
@@ -174,6 +183,8 @@ public class LevelEditor : Game
                 _fadingnotif = (3,"Scale: "+_renderscale);
                 ResizeAll();
             }
+
+            foreach (Button button in _buttons) button.Clicked = false;
         }
                     
         void ProcessMouseClick() {
@@ -186,12 +197,19 @@ public class LevelEditor : Game
             {
                 foreach (TextEntryField textfield in _textfields)
                 {
-                    if (textfield.Bounds.Contains(_camera.ScreenToWorld(Mouse.GetState().Position.ToVector2())))
-                    {
-                        _currentfield = textfield;
-                        _currentfield.Clicked = true;
-                        return;
-                    }
+                    if (!textfield.Bounds.Contains(_camera.ScreenToWorld(Mouse.GetState().Position.ToVector2()))) continue;
+                    
+                    _currentfield = textfield;
+                    _currentfield.Clicked = true;
+                    return;
+                }
+
+                foreach (Button button in _buttons)
+                {
+                    if (!button.Bounds.Contains(_camera.ScreenToWorld(Mouse.GetState().Position.ToVector2()))) continue;
+                    
+                    button.Click();
+                    return;
                 }
 
                 PlaceSprite((Sprite)_selectedGameObject);
@@ -345,6 +363,12 @@ public class LevelEditor : Game
             _spriteBatch.DrawString(_font,text,new Vector2(leftside,_camera.BoundingRectangle.Top)-fontsize,Color.Black,
                 0,Vector2.Zero,new Vector2(standardsize),SpriteEffects.None,0);
             
+            // Selection buttons
+            starting += _font.MeasureString(text).Y * -standardsize * 1.5f;
+            float soffset = _font.MeasureString(" < ").X*standardsize;
+            _selectionbuttons["left"].Position = new(leftside-soffset*1.75f,_camera.BoundingRectangle.Top-starting);
+            _selectionbuttons["right"].Position = new(leftside+soffset/2,_camera.BoundingRectangle.Top-starting);
+            
             // Properties
             starting += _font.MeasureString(text).Y * -standardsize * 1.5f;
             int i = 0;
@@ -473,6 +497,25 @@ public class LevelEditor : Game
             {
                 try
                 {
+                    if (property.PropertyType.IsSubclassOf(typeof(EngineResource)))
+                    {
+                        int inter = textfield.Text.LastIndexOf('/')+1;
+                        string field = textfield.Text[inter..];
+
+                        //Console.WriteLine(EngineResources.Textures[field].Path);
+
+                        EngineResource resource = property.PropertyType.Name switch
+                        {
+                            nameof(SpriteFontResource) => EngineResources.Fonts[field],
+                            nameof(TextureResource) => EngineResources.Textures[field],
+                            nameof(SoundEffectResource) => EngineResources.Sfx[field],
+                            _ => null
+                        };
+
+                        property.SetValue(_selectedGameObject,resource);
+                        textfield.OldText = textfield.Text;
+                    }
+                    
                     var t = Convert.ChangeType(textfield.Text,property.PropertyType);
                     property.SetValue(_selectedGameObject, t);
                     textfield.OldText = textfield.Text;
@@ -498,7 +541,7 @@ public class LevelEditor : Game
         
         foreach (var o in _objects) ResizeGameObject(o);
 
-        foreach (var b in _buttons) b.RenderScale = _renderscale;
+        foreach (var b in _buttons) b.Resize(_renderscale);
         
         foreach (var t in _textfields) t.Resize(_renderscale);
     }
@@ -553,6 +596,11 @@ public class LevelEditor : Game
                     _objects.Remove(o);
                     return;
                 }
+            }
+
+            if (o is AnimatedSprite a)
+            {
+                
             }
         }
     }

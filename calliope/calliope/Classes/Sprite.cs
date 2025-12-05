@@ -25,7 +25,27 @@ public class Sprite : IGameObject, ICloneable
     }
     [JsonIgnore]
     public Point CurrentCostume { get; set; }
-    public TextureResource SpriteTexture { get; set;}
+
+    private TextureResource _spriteTexture;
+    public TextureResource SpriteTexture
+    {
+        get => _spriteTexture;
+        set
+        {
+            _spriteTexture = value;
+            try
+            {
+                int costumeSetWidth = SpriteTexture.Texture.Width / SpriteWidth;
+                CurrentCostume = new((_costume % costumeSetWidth) * SpriteWidth,
+                    (_costume / costumeSetWidth) * SpriteHeight);
+            }
+            catch (Exception e)
+            {
+                // ignored
+            }
+        }
+    }
+
     public int SpriteWidth { get; set; } = 16;
     public int SpriteHeight { get; set; } = 16;
 

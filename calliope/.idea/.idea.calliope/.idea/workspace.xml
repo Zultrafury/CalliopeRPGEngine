@@ -68,7 +68,7 @@
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
-  <component name="RunManager" selected=".NET Project.leveleditor">
+  <component name="RunManager" selected=".NET Project.calliope">
     <configuration name="calliope" type="DotNetProject" factoryName=".NET Project">
       <option name="EXE_PATH" value="" />
       <option name="PROGRAM_PARAMETERS" value="" />
@@ -140,7 +140,7 @@
       <workItem from="1762554619611" duration="80183000" />
       <workItem from="1762978351302" duration="69922000" />
       <workItem from="1763903603502" duration="29487000" />
-      <workItem from="1764387019795" duration="75766000" />
+      <workItem from="1764387019795" duration="91928000" />
     </task>
     <servers />
   </component>
