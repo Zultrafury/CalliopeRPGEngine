@@ -23,6 +23,7 @@
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/860a1f21be134c7c868abc561ebf764864200/82/8cf816f3/OrthographicCamera.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/860a1f21be134c7c868abc561ebf764864200/c5/80d2bc21/Camera`1.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/a69b121f85054691b2a8d28643003c23136600/d5/0b748aee/SpriteFont.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/2c8e7ca976f350cba9836d5565dac56b11e0b56656fa786460eb1395857a6fa/ThrowHelper.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/5159b23811b96792d12316dd5148242a372bd596ea9d614d53abeda41057f4/Thread.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/96ccfd5052d879c2c4cc1a3d98c2a0e79f2ad1276b6f898052efa720edbebb/JsonConverter.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/calliope/Classes/DialogueBox.cs" root0="FORCE_HIGHLIGHTING" />
@@ -68,7 +69,7 @@
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
-  <component name="RunManager" selected=".NET Project.calliope">
+  <component name="RunManager" selected=".NET Project.leveleditor">
     <configuration name="calliope" type="DotNetProject" factoryName=".NET Project">
       <option name="EXE_PATH" value="" />
       <option name="PROGRAM_PARAMETERS" value="" />
@@ -140,7 +141,8 @@
       <workItem from="1762554619611" duration="80183000" />
       <workItem from="1762978351302" duration="69922000" />
       <workItem from="1763903603502" duration="29487000" />
-      <workItem from="1764387019795" duration="91928000" />
+      <workItem from="1764387019795" duration="92737000" />
+      <workItem from="1765394435646" duration="8506000" />
     </task>
     <servers />
   </component>

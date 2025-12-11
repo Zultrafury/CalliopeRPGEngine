@@ -160,6 +160,25 @@
         "runtime": {
           "lib/netcoreapp2.0/_._": {}
         }
+      },
+      "calliope/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v8.0",
+        "dependencies": {
+          "MonoGame.Content.Builder.Task": "3.8.4.1",
+          "MonoGame.Extended": "5.3.0",
+          "MonoGame.Framework.DesktopGL": "3.8.0",
+          "MonoGame.Library.OpenAL": "1.24.3.2",
+          "MonoGame.Library.SDL": "2.32.10.1",
+          "NVorbis": "0.10.5",
+          "Newtonsoft.Json": "13.0.4"
+        },
+        "compile": {
+          "bin/placeholder/calliope.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/calliope.dll": {}
+        }
       }
     }
   },
@@ -362,6 +381,11 @@
         "useSharedDesignerContext.txt",
         "version.txt"
       ]
+    },
+    "calliope/1.0.0": {
+      "type": "project",
+      "path": "../calliope/calliope.csproj",
+      "msbuildProject": "../calliope/calliope.csproj"
     }
   },
   "projectFileDependencyGroups": {
@@ -372,7 +396,8 @@
       "MonoGame.Library.OpenAL >= 1.24.3.2",
       "MonoGame.Library.SDL >= 2.32.10.1",
       "NVorbis >= 0.10.5",
-      "Newtonsoft.Json >= 13.0.4"
+      "Newtonsoft.Json >= 13.0.4",
+      "calliope >= 1.0.0"
     ]
   },
   "packageFolders": {
@@ -407,7 +432,11 @@
       "frameworks": {
         "net8.0": {
           "targetAlias": "net8.0",
-          "projectReferences": {}
+          "projectReferences": {
+            "E:\\Coding\\Neumont\\Capstone\\CalliopeRPGEngine\\calliope\\calliope\\calliope.csproj": {
+              "projectPath": "E:\\Coding\\Neumont\\Capstone\\CalliopeRPGEngine\\calliope\\calliope\\calliope.csproj"
+            }
+          }
         }
       },
       "warningProperties": {

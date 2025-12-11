@@ -32,66 +32,16 @@
         <PackageReference Include="NVorbis" Version="0.10.5" />
     </ItemGroup>
     <ItemGroup>
-      <Compile Include="..\calliope\Classes\AnimatedSprite.cs">
-        <Link>Classes\AnimatedSprite.cs</Link>
-      </Compile>
-      <Compile Include="..\calliope\Classes\DialogueBox.cs">
-        <Link>Classes\DialogueBox.cs</Link>
-      </Compile>
-      <Compile Include="..\calliope\Classes\EngineResources.cs">
-        <Link>Classes\EngineResources.cs</Link>
-      </Compile>
-      <Compile Include="..\calliope\Classes\Follower.cs">
-        <Link>Classes\Follower.cs</Link>
-      </Compile>
-      <Compile Include="..\calliope\Classes\ICommand.cs">
-        <Link>Classes\ICommand.cs</Link>
-      </Compile>
-      <Compile Include="..\calliope\Classes\IGameObject.cs">
-        <Link>Classes\IGameObject.cs</Link>
-      </Compile>
-      <Compile Include="..\calliope\Classes\InteractTriggerArea.cs">
-        <Link>Classes\InteractTriggerArea.cs</Link>
-      </Compile>
-      <Compile Include="..\calliope\Classes\Menu.cs">
-        <Link>Classes\Menu.cs</Link>
-      </Compile>
-      <Compile Include="..\calliope\Classes\MenuComponent.cs">
-        <Link>Classes\MenuComponent.cs</Link>
-      </Compile>
-      <Compile Include="..\calliope\Classes\Player.cs">
-        <Link>Classes\Player.cs</Link>
-      </Compile>
-      <Compile Include="..\calliope\Classes\Scene.cs">
-        <Link>Classes\Scene.cs</Link>
-      </Compile>
-      <Compile Include="..\calliope\Classes\SceneManager.cs">
-        <Link>Classes\SceneManager.cs</Link>
-      </Compile>
-      <Compile Include="..\calliope\Classes\Sprite.cs">
-        <Link>Classes\Sprite.cs</Link>
-      </Compile>
-      <Compile Include="..\calliope\Classes\StaticGameObjectContainer.cs">
-        <Link>Classes\StaticGameObjectContainer.cs</Link>
-      </Compile>
-      <Compile Include="..\calliope\Classes\TextDisplay.cs">
-        <Link>Classes\TextDisplay.cs</Link>
-      </Compile>
-      <Compile Include="..\calliope\Classes\Tile.cs">
-        <Link>Classes\Tile.cs</Link>
-      </Compile>
-      <Compile Include="..\calliope\Classes\TriggerArea.cs">
-        <Link>Classes\TriggerArea.cs</Link>
-      </Compile>
-      <Compile Include="..\calliope\Classes\Wall.cs">
-        <Link>Classes\Wall.cs</Link>
-      </Compile>
-    </ItemGroup>
-    <ItemGroup>
       <None Remove="Content\settings" />
       <Content Include="Content\settings">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </Content>
+      <Content Update="Content\config">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+    </ItemGroup>
+    <ItemGroup>
+      <ProjectReference Include="..\calliope\calliope.csproj" />
     </ItemGroup>
     <Target Name="RestoreDotnetTools" BeforeTargets="Restore">
         <Message Text="Restoring dotnet tools" Importance="High"/>

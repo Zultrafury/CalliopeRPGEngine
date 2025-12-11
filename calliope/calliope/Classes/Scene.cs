@@ -19,9 +19,9 @@ public class Scene
 
     public uint Player { get; set; }
     [JsonProperty]
-    private List<IGameObject> Objects { get; set; } = new();
+    public List<IGameObject> Objects { get; set; } = new();
     [JsonProperty]
-    private StaticGameObjectContainer StaticObjects { get; set; } = new();
+    public StaticGameObjectContainer StaticObjects { get; set; } = new();
     public ICommand StartAction { get; set; }
     private uint nextId = 1;
 
@@ -29,13 +29,14 @@ public class Scene
     public Scene(List<IGameObject> objects = null, ICommand startAction = null)
     {
         StartAction = startAction;
+        
         var configfile = File.ReadAllLines("Content/config");
         foreach (var line in configfile)
         {
             //Console.WriteLine(line);
             Config.Add(line.Split('=')[0], line.Split('=')[1]);
         }
-        
+
         if (objects == null) return;
         foreach (IGameObject o in objects) Add(o);
     }
