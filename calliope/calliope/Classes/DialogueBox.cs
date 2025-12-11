@@ -149,6 +149,8 @@ public class DialogueBox : IGameObject
         TextDisplay.Draw(spriteBatch, gameTime);
     }
 
+    public object Clone() => MemberwiseClone();
+
     /// <summary>
     /// Posts new dialogue to the dialogue box.
     /// </summary>

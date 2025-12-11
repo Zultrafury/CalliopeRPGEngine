@@ -105,6 +105,8 @@ public class MenuComponent : IGameObject
         }
         TextDisplay.Draw(spriteBatch, gameTime);
     }
+
+    public object Clone() => MemberwiseClone();
 }
 
 /*[Obsolete("MenuComponents do not need a custom converter now",true)]

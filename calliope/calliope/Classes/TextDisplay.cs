@@ -42,4 +42,6 @@ public class TextDisplay(SpriteFontResource font, Vector2 position, string text)
         
         _spriteBatch.DrawString(Font.Font, Text, Position, Color,0,center, (RenderScale/8) * Scale, SpriteEffects.None, 0);
     }
+
+    public object Clone() => MemberwiseClone();
 }

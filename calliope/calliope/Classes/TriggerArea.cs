@@ -75,4 +75,6 @@ public class TriggerArea(RectangleF area, ICommand linkedAction, Player player, 
         var area = new RectangleF(Area.Position * RenderScale,Area.Size * RenderScale);
         spriteBatch.DrawRectangle(area,Color.Red,5);
     }
+
+    public object Clone() => MemberwiseClone();
 }

@@ -16,6 +16,7 @@ namespace leveleditor;
 
 public class LevelEditor : Game
 {
+    private Dictionary<string, string> _settings = new();
     private Dictionary<string, string> _config = new();
     private GraphicsDeviceManager _graphics;
     private SpriteBatch _spriteBatch;
@@ -30,10 +31,12 @@ public class LevelEditor : Game
     private float _timesincelastrescale = 0;
     private Vector2 _destination = Vector2.Zero;
     private float _sidepanelfactor = 8;
-    private (float,string) _fadingnotif = (0,"");
+    private (float,string,float) _fadingnotif = (0,"",0);
     private SceneManager _sceneManager = new();
     private List<IGameObject> _sampleObjects = new();
-    private IGameObject _selectedGameObject;
+    private int _selectionIndex = 0;
+
+    private IGameObject _selectedGameObject => _sampleObjects[_selectionIndex];
     private Dictionary<PropertyInfo,TextEntryField> _propertyfields = new();
     private List<Button> _buttons = new();
     private Dictionary<string,Button> _selectionbuttons = new();
@@ -46,8 +49,15 @@ public class LevelEditor : Game
         Content.RootDirectory = "Content";
         IsMouseVisible = true;
         
-        // --- CONFIG FILE ---
+        // --- SETTINGS FILE ---
         var configfile = File.ReadAllLines("Content/settings");
+        foreach (var line in configfile)
+        {
+            _settings.Add(line.Split('=')[0], line.Split('=')[1]);
+        }
+        
+        // --- CONFIG FILE ---
+        configfile = File.ReadAllLines("Content/config");
         foreach (var line in configfile)
         {
             _config.Add(line.Split('=')[0], line.Split('=')[1]);
@@ -62,8 +72,8 @@ public class LevelEditor : Game
         _graphics.PreferredBackBufferHeight = (int)screenHeight;
         _graphics.PreferredBackBufferWidth = (int)screenWidth;
         
-        _renderscale = float.Parse(_config["renderscale"]);
-        _sidepanelfactor = float.Parse(_config["sidepanelfactor"]);
+        _renderscale = float.Parse(_settings["renderscale"]);
+        _sidepanelfactor = float.Parse(_settings["sidepanelfactor"]);
         
         var viewportAdapter = new WindowViewportAdapter(Window, GraphicsDevice);
         _camera = new OrthographicCamera(viewportAdapter)
@@ -83,43 +93,35 @@ public class LevelEditor : Game
 
     protected override void LoadContent()
     {
+        _sceneManager.Camera = _camera;
+        ICommand.SceneManager = _sceneManager;
+        ICommand.Game = this;
+        ICommand.SceneManager.Path = _settings["scenesfile"];
         _spriteBatch = new SpriteBatch(GraphicsDevice);
 
-        EngineResources.LoadAsset("Assets/Fonts/GamerFont");
-        _font = EngineResources.Fonts["GamerFont"].Font;
-        EngineResources.LoadAsset("Assets/Images/basetiles");
+        // Assets
+        // TEXTURES
         EngineResources.LoadAsset("Assets/Images/basechar");
+        EngineResources.LoadAsset("Assets/Images/basetiles");
         
-        _sampleObjects.Add(new Sprite(EngineResources.Textures["basetiles"], Vector2.Zero, new Point(16),1));
-        foreach (var o in _sampleObjects) o.RenderScale = _renderscale;
-        _selectedGameObject = _sampleObjects[0];
-
-        var button = new Button(new (0, 0), _font, _renderscale);
-        button.Decorate(" < ",3);
-        _buttons.Add(button);
-        _selectionbuttons["left"] = button;
+        // FONTS
+        EngineResources.LoadAsset("Assets/Fonts/GamerFont");
+        EngineResources.LoadAsset("Assets/Fonts/ArialFont");
+        _font = EngineResources.Fonts["GamerFont"].Font;
         
-        button = new Button(new (0, 0), _font, _renderscale);
-        button.Decorate(" > ",3);
-        _buttons.Add(button);
-        _selectionbuttons["right"] = button;
+        // SFX
+        EngineResources.LoadAsset("Assets/Sounds/ding");
+        EngineResources.LoadAsset("Assets/Sounds/accept");
+        EngineResources.LoadAsset("Assets/Sounds/deny");
 
         /*string text = "My textfield!";
         var textfield = new TextEntryField(-(_font.MeasureString(text)/2)*(5/_renderscale), _font, _renderscale, true);
         textfield.Decorate(text, () => { Console.WriteLine(textfield.Text); });
         _textfields.Add(textfield);*/
-
-        bool load = bool.Parse(_config["loadfile"]);
-
-        if (load)
+        
+        // Load on startup
+        if (bool.Parse(_settings["loadfile"]))
         {
-            _sceneManager.Camera = _camera;
-            ICommand.SceneManager = _sceneManager;
-            ICommand.Game = this;
-            _spriteBatch = new SpriteBatch(GraphicsDevice);
-
-            ICommand.SceneManager.Path = _config["scenesfile"];
-
             var scenes =
                 JsonConvert.DeserializeObject<Dictionary<string, Scene>>(File.ReadAllText(ICommand.SceneManager.Path),
                     new JsonSerializerSettings()
@@ -130,14 +132,78 @@ public class LevelEditor : Game
             _sceneManager.Scenes = scenes;
 
             Console.WriteLine($"Content successfully read from {ICommand.SceneManager.Path}");
+            _fadingnotif = (20,$"Content successfully read from\n{ICommand.SceneManager.Path}",4);
 
             _sceneManager.ChangeScene(_sceneManager.Scenes.Last().Key);
         }
         else
         {
-            _sceneManager.AddScene("scene",new Scene());
-            _sceneManager.CurrentScene = "scene";
+            _sceneManager.AddScene("mainmenu",new Scene());
+            _sceneManager.CurrentScene = "mainmenu";
         }
+        
+        // Sample Objects
+        var sprite = new Sprite(EngineResources.Textures["basetiles"], Vector2.Zero, new Point(16), 1)
+        {
+            RenderOrder = -100
+        };
+        _sampleObjects.Add(sprite);
+
+        var wall = new Wall(EngineResources.Textures["basetiles"], Vector2.Zero, new(16, 16), 3)
+        {
+            RenderOrder = -100
+        };
+        _sampleObjects.Add(wall);
+        
+        var animatedsprite = new AnimatedSprite(EngineResources.Textures["basechar"], Vector2.Zero, new (16,16), 150)
+        {
+            AnimRange = new (0, 4)
+        };
+        _sampleObjects.Add(animatedsprite);
+        
+        Dictionary<string, Point> basecharAnimSets = new()
+        {
+            { "walk_up", new (4, 8) },
+            { "walk_down", new (0, 4) },
+            { "walk_left", new (12, 16) },
+            { "walk_right", new (8, 12) }
+        };
+        var player = new Player(EngineResources.Textures["basechar"], Vector2.Zero,
+            16,16,150)
+        {
+            Camera = _sceneManager.Scene.Camera,
+            Config =  _config,
+            AnimSets = basecharAnimSets
+        };
+        _sampleObjects.Add(player);
+        
+        foreach (var o in _sampleObjects) o.RenderScale = _renderscale;
+        _selectionIndex = 0;
+        
+        // Selection Buttons
+        var button = new Button(new (0, 0), _font, _renderscale);
+        button.Decorate(" < ",3);
+        button.OnClick = () =>
+        {
+            _selectionIndex--;
+            if (_selectionIndex < 0) _selectionIndex = _sampleObjects.Count - 1;
+            PopulateSidePanel();
+            ResizeAll();
+        };
+        _buttons.Add(button);
+        _selectionbuttons["left"] = button;
+        
+        button = new Button(new (0, 0), _font, _renderscale);
+        button.Decorate(" > ",3);
+        button.OnClick = () =>
+        {
+            _selectionIndex++;
+            if (_selectionIndex >= _sampleObjects.Count) _selectionIndex = 0;
+            PopulateSidePanel();
+            ResizeAll();
+        };
+        _buttons.Add(button);
+        _selectionbuttons["right"] = button;
 
         PopulateSidePanel();
         ResizeAll();
@@ -201,7 +267,7 @@ public class LevelEditor : Game
                 _timesincelastrescale = 0.1f;
                 _renderscale+=0.5f;
                 _zoom = (1000 / (_renderscale * _renderscale));
-                _fadingnotif = (3,"Scale: "+_renderscale);
+                _fadingnotif = (3,"Scale: "+_renderscale,12);
                 ResizeAll();
             }
 
@@ -210,7 +276,7 @@ public class LevelEditor : Game
                 _timesincelastrescale = 0.1f;
                 _renderscale-=0.5f;
                 _zoom = (1000 / (_renderscale * _renderscale));
-                _fadingnotif = (3,"Scale: "+_renderscale);
+                _fadingnotif = (3,"Scale: "+_renderscale,12);
                 ResizeAll();
             }
 
@@ -219,9 +285,32 @@ public class LevelEditor : Game
                     
         void ProcessMouseClick() {
             if (!MouseInBounds()) return;
+
+            if (Keyboard.GetState().IsKeyDown(Keys.S) && !_previousKeyboardState.IsKeyDown(Keys.S) &&
+                Keyboard.GetState().IsKeyDown(Keys.LeftControl))
+            {
+                var json = JsonConvert.SerializeObject(_sceneManager.Scenes, Formatting.Indented,
+                    new JsonSerializerSettings
+                    {
+                        TypeNameHandling = TypeNameHandling.Auto,
+                        Converters = EngineResources.Converters
+                    });
+
+                try
+                {
+                    File.WriteAllText(ICommand.SceneManager.Path, json);
+                    Console.WriteLine($"Content successfully written to {ICommand.SceneManager.Path}");
+                    _fadingnotif = (20,$"Content successfully written to\n{ICommand.SceneManager.Path}",4);
+                }
+                catch (IOException ex)
+                {
+                    Console.WriteLine($"Error writing to file: {ex.Message}");
+                }
+            }
+            
             if (Keyboard.GetState().IsKeyDown(Keys.LeftControl) && Mouse.GetState().LeftButton == ButtonState.Pressed)
             {
-                PlaceSprite((Sprite)_selectedGameObject);
+                PlaceSprite(_selectedGameObject);
             }
             else if (Mouse.GetState().LeftButton == ButtonState.Pressed && _previousMouseState.LeftButton == ButtonState.Released)
             {
@@ -242,7 +331,7 @@ public class LevelEditor : Game
                     return;
                 }
 
-                PlaceSprite((Sprite)_selectedGameObject);
+                PlaceSprite(_selectedGameObject);
             }
             else if (Keyboard.GetState().IsKeyDown(Keys.LeftControl) && Mouse.GetState().RightButton == ButtonState.Pressed)
             {
@@ -432,23 +521,29 @@ public class LevelEditor : Game
             void DisplaySelectedGameObject()
             {
                 _selectedGameObject.RenderScale = 80/_renderscale;
-                switch (_selectedGameObject.GetType().Name)
+                switch (_selectedGameObject)
                 {
-                    case nameof(Sprite):
+                    case Sprite sprite:
                     {
-                        if (_selectedGameObject is Sprite sprite)
-                        {
-                            Vector2 center = new (_camera.BoundingRectangle.Center.X,_camera.BoundingRectangle.Bottom-fontsize.Y
-                                -(sprite.SpriteHeight*(40/_renderscale)));
-                            sprite.Position = (center-new Vector2((_camera.BoundingRectangle.Width/_sidepanelfactor) 
-                                                *((_sidepanelfactor/2)-1),0)) 
-                                                /(80/_renderscale);
-                            /*sprite.Position = ((_camera.BoundingRectangle.Center-new Vector2((_camera.BoundingRectangle.Width/_sidepanelfactor)
-                                                   *((_sidepanelfactor/2)-1),0))
-                                               *sprite.SpriteWidth*(80/_renderscale))
-                                              /(80/_renderscale*_zoom);*/
-                            //Console.WriteLine(sprite.Position.ToNumerics()+" : "+_camera.BoundingRectangle.Center.ToNumerics());
-                        }
+                        Vector2 center = new (_camera.BoundingRectangle.Center.X,_camera.BoundingRectangle.Bottom-fontsize.Y
+                            -(sprite.SpriteHeight*(40/_renderscale)));
+                        sprite.Position = (center-new Vector2((_camera.BoundingRectangle.Width/_sidepanelfactor) 
+                                            *((_sidepanelfactor/2)-1),0)) 
+                                            /(80/_renderscale);
+                        /*sprite.Position = ((_camera.BoundingRectangle.Center-new Vector2((_camera.BoundingRectangle.Width/_sidepanelfactor)
+                                               *((_sidepanelfactor/2)-1),0))
+                                           *sprite.SpriteWidth*(80/_renderscale))
+                                          /(80/_renderscale*_zoom);*/
+                        //Console.WriteLine(sprite.Position.ToNumerics()+" : "+_camera.BoundingRectangle.Center.ToNumerics());
+                        break;
+                    }
+                    case AnimatedSprite animatedSprite:
+                    {
+                        Vector2 center = new (_camera.BoundingRectangle.Center.X,_camera.BoundingRectangle.Bottom-fontsize.Y
+                            -(animatedSprite.SpriteHeight*(40/_renderscale)));
+                        animatedSprite.Position = (center-new Vector2((_camera.BoundingRectangle.Width/_sidepanelfactor) 
+                                                              *((_sidepanelfactor/2)-1),0)) 
+                                          /(80/_renderscale);
                         break;
                     }
                 }
@@ -475,7 +570,7 @@ public class LevelEditor : Game
         {
             if (_fadingnotif.Item1 > 0.009)
             {
-                var standardsize = 12 / _renderscale;
+                var standardsize = _fadingnotif.Item3 / _renderscale;
                 var fontsize = new Vector2(_font.MeasureString(_fadingnotif.Item2).X * standardsize / 2,
                     _font.MeasureString(_fadingnotif.Item2).Y * (standardsize * 33f / 60f));
                 var pos = new Vector2(_camera.BoundingRectangle.Center.X, _camera.BoundingRectangle.Top +
@@ -507,7 +602,7 @@ public class LevelEditor : Game
         var properties = _selectedGameObject.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance);
         foreach (PropertyInfo property in properties)
         {
-            string[] gameobjectproperties = ["Position","Id","UpdateOrder"];
+            string[] gameobjectproperties = ["Position","Id","UpdateOrder","CurrentMenu","StatusMenu","AnimSets","Followers"];
             if (gameobjectproperties.Contains(property.Name)) continue;
             if (property.GetCustomAttribute<JsonIgnoreAttribute>() != null) continue;
             
@@ -517,6 +612,10 @@ public class LevelEditor : Game
             if (property.PropertyType.IsSubclassOf(typeof(EngineResource)) && property.GetValue(_selectedGameObject) is EngineResource res)
             {
                 text = res.Path;
+            }
+            else if (property.PropertyType == typeof(Point) && property.GetValue(_selectedGameObject) is Point pnt)
+            {
+                text = pnt.X+","+pnt.Y;
             }
             else
             {
@@ -543,6 +642,16 @@ public class LevelEditor : Game
                         };
 
                         property.SetValue(_selectedGameObject,resource);
+                        textfield.OldText = textfield.Text;
+                    }
+                    else if (property.PropertyType == typeof(Point))
+                    {
+                        var point = new Point();
+                        int inter = textfield.Text.IndexOf(',');
+                        point.X = int.Parse(textfield.Text[..inter]);
+                        point.Y = int.Parse(textfield.Text[(inter+1)..]);
+                        
+                        property.SetValue(_selectedGameObject,point);
                         textfield.OldText = textfield.Text;
                     }
                     
@@ -608,7 +717,7 @@ public class LevelEditor : Game
         }
     }
     
-    void PlaceSprite(Sprite sprite)
+    void PlaceSprite(IGameObject obj)
     {
         Vector2 placementpos = Vector2.Round(
             (_camera.ScreenToWorld(Mouse.GetState().Position.ToVector2()))
@@ -619,15 +728,34 @@ public class LevelEditor : Game
             if (o is Sprite s)
             {
                 if (Vector2.Distance(s.Position/s.SpriteWidth, placementpos) > 0.5f) continue;
-                //Console.WriteLine("Overlap at "+placementpos);
+                if (Math.Abs(s.RenderOrder - _selectedGameObject.RenderOrder) > 1) continue;
+                _fadingnotif = (20,$"Overlap at {placementpos}",4);
+                return;
+            }
+            
+            if (o is AnimatedSprite a)
+            {
+                if (Vector2.Distance(a.Position/a.SpriteWidth, placementpos) > 0.5f) continue;
+                if (Math.Abs(a.RenderOrder - _selectedGameObject.RenderOrder) > 1) continue;
+                _fadingnotif = (20,$"Overlap at {placementpos}",4);
                 return;
             }
         }
 
-        Sprite newSprite = (Sprite)sprite.Clone();
-        newSprite.Position = placementpos * newSprite.SpriteWidth;
-        ResizeGameObject(newSprite);
-        _sceneManager.Scene.StaticObjects.Add(newSprite);
+        var clone = obj.Clone();
+        switch (clone)
+        {
+            case Sprite sprite:
+                sprite.Position = placementpos * sprite.SpriteWidth;
+                ResizeGameObject(sprite);
+                _sceneManager.Scene.StaticObjects.Add(sprite);
+                break;
+            case AnimatedSprite animatedSprite:
+                animatedSprite.Position = placementpos * animatedSprite.SpriteWidth;
+                ResizeGameObject(animatedSprite);
+                _sceneManager.Scene.StaticObjects.Add(animatedSprite);
+                break;
+        }
     }
 
     void RemoveSprite()
@@ -636,21 +764,46 @@ public class LevelEditor : Game
             (_camera.ScreenToWorld(Mouse.GetState().Position.ToVector2()))
             / (_renderscale * _zoom));
 
-        foreach (var o in _sceneManager.Scene.StaticObjects.Objects)
+        foreach (var o in _sceneManager.Scene.Objects)
         {
-            if (o is Sprite s)
+            if (o is Player p)
+            {
+                if (Vector2.Distance(p.Position / p.SpriteWidth, placementpos) < 0.5f)
+                {
+                    _sceneManager.Scene.Objects.Remove(p);
+                    return;
+                }
+            }
+        }
+        
+        foreach (var o in _sceneManager.Scene.StaticObjects.Objects)//.OrderBy(x => x.RenderOrder).Reverse())
+        {
+            if (o.GetType().Name == "Sprite" && o is Sprite s)
             {
                 if (Vector2.Distance(s.Position / s.SpriteWidth, placementpos) < 0.5f)
                 {
-                    Console.WriteLine(s.Position+", "+placementpos);
+                    //Console.WriteLine(s.Position+", "+placementpos);
                     _sceneManager.Scene.StaticObjects.Sprites.Remove(s);
                     return;
                 }
             }
 
-            if (o is AnimatedSprite a)
+            else if (o.GetType().Name == "AnimatedSprite" && o is AnimatedSprite a)
             {
-                
+                if (Vector2.Distance(a.Position / a.SpriteWidth, placementpos) < 0.5f)
+                {
+                    _sceneManager.Scene.StaticObjects.AnimatedSprites.Remove(a);
+                    return;
+                }
+            }
+            
+            else if (o.GetType().Name == "Wall" && o is Wall w)
+            {
+                if (Vector2.Distance(w.Position / w.SpriteWidth, placementpos) < 0.5f)
+                {
+                    _sceneManager.Scene.StaticObjects.Walls.Remove(w);
+                    return;
+                }
             }
         }
     }

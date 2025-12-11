@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 
 namespace calliope.Classes;
 
-public class Sprite : IGameObject, ICloneable
+public class Sprite : IGameObject
 {
     public Vector2 Position { get; set; }
 
@@ -124,7 +124,9 @@ public class Sprite : IGameObject, ICloneable
                 (int)(SpriteWidth*RenderScale),(int)(SpriteHeight*RenderScale)),
             new Rectangle(CurrentCostume,SpriteDimensions), Color.White);
     }
-    
+
+    public object Clone() => MemberwiseClone();
+
     public static Texture2D GeneratePlaceholder(GraphicsDevice graphicsDevice, int width, int height)
     {
         Color[] colors = new Color[width * height];
@@ -146,10 +148,5 @@ public class Sprite : IGameObject, ICloneable
         result.SetData(colors);
         
         return result;
-    }
-
-    public object Clone()
-    {
-        return MemberwiseClone();
     }
 }

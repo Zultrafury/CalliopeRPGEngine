@@ -15,6 +15,7 @@ public interface IGameObject
     public void SceneInit(Scene scene);
     public void Update(GameTime gameTime);
     public void Draw(SpriteBatch spriteBatch, GameTime gameTime);
+    public object Clone();
 }
 
 public static class IGameObjectExtensions

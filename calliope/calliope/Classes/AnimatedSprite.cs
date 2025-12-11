@@ -135,4 +135,6 @@ public class AnimatedSprite : IGameObject
             else nextFrame = false;
         } while (nextFrame);
     }
+
+    public object Clone() => MemberwiseClone();
 }

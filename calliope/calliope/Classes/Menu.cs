@@ -97,6 +97,11 @@ public class Menu : IGameObject
         //spriteBatch.DrawCircle(Position,5*RenderScale,16,Color.Green,1*RenderScale);
     }
 
+    public object Clone()
+    {
+        throw new NotImplementedException();
+    }
+
     public void SetSounds(SoundEffectResource navigate, SoundEffectResource select, SoundEffectResource back)
     {
         Sounds["navigate"] = navigate;
