@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -42,6 +43,7 @@ public class LevelEditor : Game
     private Dictionary<string,Button> _selectionbuttons = new();
     private List<TextEntryField> _textfields = new();
     private TextEntryField _currentfield = null;
+    private Process runtimeTest = null;
 
     public LevelEditor()
     {
@@ -204,6 +206,22 @@ public class LevelEditor : Game
         };
         _buttons.Add(button);
         _selectionbuttons["right"] = button;
+        
+        button = new Button(new Vector2(1,  0),   _font, _renderscale);
+        button.Decorate("Launch Runtime",3);
+        button.OnClick = () =>
+        {
+            if (runtimeTest == null || runtimeTest.HasExited)
+            {
+                runtimeTest = Process.Start("calliope.exe");
+            }
+            else
+            {
+                _fadingnotif = (5,"Runtime already launched!",6);
+            }
+        };
+        _buttons.Add(button);
+        _selectionbuttons["launch"] = button;
 
         PopulateSidePanel();
         ResizeAll();
@@ -487,6 +505,7 @@ public class LevelEditor : Game
             float soffset = _font.MeasureString(" < ").X*standardsize;
             _selectionbuttons["left"].Position = new(leftside-soffset*1.75f,_camera.BoundingRectangle.Top-starting);
             _selectionbuttons["right"].Position = new(leftside+soffset/2,_camera.BoundingRectangle.Top-starting);
+            _selectionbuttons["launch"].Position = new(_camera.BoundingRectangle.Right,_camera.BoundingRectangle.Top);
             
             // Properties
             starting += _font.MeasureString(text).Y * -standardsize * 1.5f;

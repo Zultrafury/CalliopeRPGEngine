@@ -9,7 +9,7 @@ public class Button
 {
     public Vector2 Position { get; set;  }
     public SizeF Size { get; set; }
-    public RectangleF Bounds => new(Position, Size);
+    public RectangleF Bounds => new(Position-(Offset * Size), Size);
 
     public Vector2 Offset { get; set; }
     public string Text { get; set; }
@@ -39,9 +39,13 @@ public class Button
         var standardsize = TextSize/RenderScale;
         var fontsize = Font.MeasureString(Text) * standardsize / 2;
         Color color = Clicked ? ClickedColor : BackgroundColor;
+
+        //var relativeOffset = Offset * Size;
+        //var offsetBounds = new RectangleF(Position - relativeOffset, Size);
+        
         spriteBatch.FillRectangle(Bounds, color);
         
-        spriteBatch.DrawString(Font,Text,Position+(fontsize/4),TextColor,
+        spriteBatch.DrawString(Font,Text,Bounds.Position+(fontsize/4),TextColor,
             0,Vector2.Zero,new Vector2(standardsize),SpriteEffects.None,0);
         spriteBatch.DrawRectangle(Bounds,Color.Red);
     }

@@ -35,22 +35,23 @@ The engine is composed of two main components:
 | `Tab` / `C` | Open Menu |
 | `Esc` | Force Quit |
 | `Shift` | Run |
-| `WASD` / Arrow Keys | Move / Navigate Menu |
+| `WASD` / `Arrow Keys` | Move / Navigate Menu |
 | `F1` | Maximize Window |
 
 ## Editor:
 
 | Key / Input | Action |
 |-------------|--------|
-| Middle Mouse Button / `G` | Pan |
+| `Ctrl + S` | Save |
+| `Middle Mouse Button` / `G` | Pan |
 | `F` | Focus |
-| Left Click | Place / Select |
-| Right Click | Remove |
+| `Left Click` | Place / Select |
+| `Right Click` | Remove |
 | `Esc` | Quit |
 | `Space` | Recenter |
 | `Enter` | Accept |
-| Scroll Up / `I` | Zoom In |
-| Scroll Down / `K` | Zoom Out |
+| `Scroll Up` / `I` | Zoom In |
+| `Scroll Down` / `K` | Zoom Out |
 | `Ctrl + Left Click` | Paint Placement |
 | `+` / `-` | Increase / Decrease UI Scale |
 
