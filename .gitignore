@@ -1,2 +1,18 @@
-/calliope/calliope/obj
-/calliope/leveleditor/obj
+# --- Visual Studio Artifacts ---
+[Bb]in/
+[Oo]bj/
+.vs/
+*.user
+*.suo
+*.userprefs
+*.sln.docstates
+
+# --- MonoGame Specifics ---
+# Ignore the built content artifacts (.xnb files)
+# These are generated from your source assets (png, wav, etc.)
+Content/bin/
+Content/obj/
+
+# --- OS Specific ---
+.DS_Store
+Thumbs.db
