@@ -124,6 +124,8 @@ public class MainGame : Game
         }
         else
         {
+            try
+            {
             var scenes =
                 JsonConvert.DeserializeObject<Dictionary<string, Scene>>(File.ReadAllText(ICommand.SceneManager.Path),
                     new JsonSerializerSettings()
@@ -131,7 +133,14 @@ public class MainGame : Game
                         TypeNameHandling = TypeNameHandling.Auto,
                         Converters = EngineResources.Converters
                     });
-            _sceneManager.Scenes = scenes;
+            
+                _sceneManager.Scenes = scenes;
+            }
+            catch (FileNotFoundException e)
+            {
+                Console.Error.WriteLine($"{ICommand.SceneManager.Path} unsuccessfully read; make sure the config points to valid game data!\n");
+                throw;
+            }
             
             Console.WriteLine($"Content successfully read from {ICommand.SceneManager.Path}");
         }

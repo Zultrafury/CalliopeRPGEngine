@@ -142,6 +142,9 @@ public class LevelEditor : Game
         {
             _sceneManager.AddScene("mainmenu",new Scene());
             _sceneManager.CurrentScene = "mainmenu";
+            
+            Console.WriteLine($"{ICommand.SceneManager.Path} unsuccessfully read, opening empty project");
+            _fadingnotif = (20,$"{ICommand.SceneManager.Path}\nunsuccessfully read, opening empty project",4);
         }
         
         // Sample Objects
@@ -207,7 +210,7 @@ public class LevelEditor : Game
         _buttons.Add(button);
         _selectionbuttons["right"] = button;
         
-        button = new Button(new Vector2(1,  0),   _font, _renderscale);
+        button = new Button(new Vector2(1,  1),   _font, _renderscale);
         button.Decorate("Launch Runtime",3);
         button.OnClick = () =>
         {
@@ -505,7 +508,7 @@ public class LevelEditor : Game
             float soffset = _font.MeasureString(" < ").X*standardsize;
             _selectionbuttons["left"].Position = new(leftside-soffset*1.75f,_camera.BoundingRectangle.Top-starting);
             _selectionbuttons["right"].Position = new(leftside+soffset/2,_camera.BoundingRectangle.Top-starting);
-            _selectionbuttons["launch"].Position = new(_camera.BoundingRectangle.Right,_camera.BoundingRectangle.Top);
+            _selectionbuttons["launch"].Position = new(_camera.BoundingRectangle.Right,_camera.BoundingRectangle.Bottom);
             
             // Properties
             starting += _font.MeasureString(text).Y * -standardsize * 1.5f;
